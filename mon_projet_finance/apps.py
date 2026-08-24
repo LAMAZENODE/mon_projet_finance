@@ -5,9 +5,10 @@ import stripe
 
 app = Flask(__name__)
 
-# Configurer les clés via les variables d'environnement (plus sécurisé)
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_live_51U3wxwAGivtq6O4I...")
-ID_PRIX_STRIPE = os.environ.get("STRIPE_PRICE_ID", "price_1U7e4FAGivtq6O4I...")
+# Configuration 100% sécurisée pour GitHub public
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+ID_PRIX_STRIPE = os.environ.get("STRIPE_PRICE_ID")
+
 
 # Simulation Base de Données
 utilisateur_connecte = {
