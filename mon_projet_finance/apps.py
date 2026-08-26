@@ -215,6 +215,8 @@ if st.session_state["est_abonne"]:
         st.dataframe(df_b, use_container_width=True)
     with tab3:
         st.dataframe(df_c, use_container_width=True)
+
+
 else:
     # --- INTERFACE TEASER PRO (PAYWALL MARKETING) ---
     col_gauche, col_droite = st.columns([1.2, 1], gap="large")
@@ -252,20 +254,27 @@ else:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # CORRECTION : On génère le lien de paiement DIRECTEMENT au chargement sans attendre un clic
+        # Détection automatique de l'URL de votre application en ligne pour le retour Stripe
+        url_actuelle = "https://streamlit.app"  # ⚠️ REMPLACEZ PAR VOTRE VRAIE URL STREAMLIT CLOUD
+        
+        # Génération sécurisée du bouton de paiement
         try:
-            session_checkout = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
-                mode='subscription',
-                success_url="http://localhost:8501/?success=true",
-                cancel_url="http://localhost:8501/?success=false",
-                customer_email=st.session_state["email"]
-            )
-            # Le bouton Stripe s'affiche maintenant tout de suite !
-            st.markdown(f'<div style="text-align:center; margin-top:15px;"><a class="stripe-button" href="{session_checkout.url}" target="_blank">💳 Activer via Stripe Secure</a></div>', unsafe_allow_html=True)
+            if not ID_PRIX_STRIPE or not stripe.api_key:
+                st.error("❌ Clés Stripe manquantes dans les Secrets Streamlit.")
+            else:
+                session_checkout = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
+                    mode='subscription',
+                    success_url=f"{url_actuelle}/?success=true",
+                    cancel_url=f"{url_actuelle}/?success=false",
+                    customer_email=st.session_state["email"]
+                )
+                # Affichage du bouton premium officiel
+                st.markdown(f'<div style="text-align:center; margin-top:15px;"><a class="stripe-button" href="{session_checkout.url}" target="_blank">💳 Activer via Stripe Secure</a></div>', unsafe_allow_html=True)
         except Exception as e:
-            st.error("⚠️ Impossible de charger le bouton Stripe. Vérifiez que vos clés STRIPE_SECRET_KEY et STRIPE_PRICE_ID sont correctement collées dans les Secrets de Streamlit.")
+            # Affichage de l'erreur directement dans la colonne de droite pour comprendre le blocage
+            st.error(f"⚠️ Erreur Stripe technique : {e}")
         
         st.markdown("""
             <div class="security-banner">
@@ -274,13 +283,3 @@ else:
             </div>
         """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
