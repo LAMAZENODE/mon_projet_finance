@@ -142,7 +142,7 @@ st.divider()
 
 if st.session_state["est_abonne"]:
     # --- INTERFACE DÉBLOQUÉE (MEMBRES) ---
-    st.success("🔓 Accès Premium Activé — Rapports PDF et Inflation débloqués")
+    st.success("🔓 Accès Premium Activé — Rapports PDF et Inflation debloqués")
     
     col_g, col_m, col_d = st.columns(3)
     with col_g:
@@ -230,6 +230,7 @@ else:
             <div class="feature-box" style="text-align:left;">🛡️ <b>Moteur d'Inflation Réel</b> (Calcul du pouvoir d'achat résiduel)</div>
             <div class="feature-box" style="text-align:left;">📊 <b>Comparateur Simultané</b> sur 3 profils d'investisseurs</div>
             <div class="feature-box" style="text-align:left;">📥 <b>Export PDF Instantané</b> prêt à imprimer pour vos décisions</div>
+
 
 
 
