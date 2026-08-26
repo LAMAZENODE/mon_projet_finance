@@ -74,10 +74,15 @@ if "email" not in st.session_state:
 
 # Gestion du retour de paiement Stripe
 query_params = st.query_params
-if "success" in query_params and query_params["success"] == "true":
-    st.session_state["est_abonne"] = True
-    st.success("🎉 Votre abonnement a bien été activé ! Merci pour votre confiance.")
-    st.query_params.clear()
+# --- GESTION DU RETOUR DE PAIEMENT STRIPE (CORRIGÉE) ---
+# On vérifie si "success" est présent dans l'URL
+if "success" in st.query_params:
+    if st.query_params["success"] == "true":
+        st.session_state["est_abonne"] = True
+        st.toast("🎉 Abonnement activé avec succès !", icon="🚀")
+    # Au lieu de .clear() qui casse la session, on retire proprement les paramètres
+    del st.query_params["success"]
+
 
 # Barre latérale
 st.sidebar.markdown("### 🔒 Espace Client")
