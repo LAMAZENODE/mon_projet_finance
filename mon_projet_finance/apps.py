@@ -72,7 +72,7 @@ if "est_abonne" not in st.session_state:
 if "email" not in st.session_state:
     st.session_state["email"] = "client@exemple.com"
 
-# --- GESTION DU RETOUR DE PAIEMENT STRIPE DOUBLE SÉCURITÉ ---
+# --- GESTION DU RETOUR DE PAIEMENT STRIPE ---
 if "success" in st.query_params and st.query_params["success"] == "true":
     st.session_state["est_abonne"] = True
 
@@ -230,4 +230,6 @@ else:
             <div class="feature-box" style="text-align:left;">🛡️ <b>Moteur d'Inflation Réel</b> (Calcul du pouvoir d'achat résiduel)</div>
             <div class="feature-box" style="text-align:left;">📊 <b>Comparateur Simultané</b> sur 3 profils d'investisseurs</div>
             <div class="feature-box" style="text-align:left;">📥 <b>Export PDF Instantané</b> prêt à imprimer pour vos décisions</div>
+
+
 
