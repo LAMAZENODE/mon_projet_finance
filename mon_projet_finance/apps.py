@@ -215,7 +215,6 @@ if st.session_state["est_abonne"]:
         st.dataframe(df_b, use_container_width=True)
     with tab3:
         st.dataframe(df_c, use_container_width=True)
-
 else:
     # --- INTERFACE TEASER PRO (PAYWALL MARKETING) ---
     col_gauche, col_droite = st.columns([1.2, 1], gap="large")
@@ -240,6 +239,42 @@ else:
 
     with col_droite:
         st.markdown('<div class="paywall-container">', unsafe_allow_html=True)
+        st.markdown("### 🚀 Débloquez les Outils d'Analyse Avancés")
+        st.markdown("<h2 style='color:#635bff; margin:0;'>9,00 € <span style='font-size:16px; color:#6c757d;'>/ mois</span></h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#495057; font-size:14px; margin-bottom:20px;'>Sans engagement. Annulation instantanée.</p>", unsafe_allow_html=True)
+        
+        st.markdown("""
+            <div class="feature-box" style="text-align:left;">🛡️ <b>Moteur d'Inflation Réel</b> (Calcul du pouvoir d'achat résiduel)</div>
+            <div class="feature-box" style="text-align:left;">📊 <b>Comparateur Simultané</b> sur 3 profils d'investisseurs</div>
+            <div class="feature-box" style="text-align:left;">📥 <b>Export PDF Instantané</b> prêt à imprimer pour vos décisions</div>
+            <div class="feature-box" style="text-align:left;">🔒 <b>Infrastructure Sécurisée Stripe</b> (Chiffrement SSL)</div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # CORRECTION : On génère le lien de paiement DIRECTEMENT au chargement sans attendre un clic
+        try:
+            session_checkout = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
+                mode='subscription',
+                success_url="http://localhost:8501/?success=true",
+                cancel_url="http://localhost:8501/?success=false",
+                customer_email=st.session_state["email"]
+            )
+            # Le bouton Stripe s'affiche maintenant tout de suite !
+            st.markdown(f'<div style="text-align:center; margin-top:15px;"><a class="stripe-button" href="{session_checkout.url}" target="_blank">💳 Activer via Stripe Secure</a></div>', unsafe_allow_html=True)
+        except Exception as e:
+            st.error("⚠️ Impossible de charger le bouton Stripe. Vérifiez que vos clés STRIPE_SECRET_KEY et STRIPE_PRICE_ID sont correctement collées dans les Secrets de Streamlit.")
+        
+        st.markdown("""
+            <div class="security-banner">
+                🔒 Transaction de confiance opérée par <b>Stripe</b>.<br>
+                Vos données restent privées et chiffrées.
+            </div>
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
