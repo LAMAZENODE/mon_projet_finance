@@ -267,8 +267,8 @@ else:
     line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
     mode='subscription',
     # Utilisation de la bonne URL en ligne :
-    success_url=f"{https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
-    cancel_url=f"{https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
+    success_url="https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
+    cancel_url="https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
     customer_email=st.session_state["email"]
 )
 
