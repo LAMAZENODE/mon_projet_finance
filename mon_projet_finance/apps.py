@@ -66,23 +66,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Simulation de la session utilisateur
+# Initialisation de la session utilisateur
 if "est_abonne" not in st.session_state:
     st.session_state["est_abonne"] = False
 if "email" not in st.session_state:
     st.session_state["email"] = "client@exemple.com"
 
-# Gestion du retour de paiement Stripe
-query_params = st.query_params
-# --- GESTION DU RETOUR DE PAIEMENT STRIPE (CORRIGÉE) ---
-# On vérifie si "success" est présent dans l'URL
-if "success" in st.query_params:
-    if st.query_params["success"] == "true":
-        st.session_state["est_abonne"] = True
-        st.toast("🎉 Abonnement activé avec succès !", icon="🚀")
-    # Au lieu de .clear() qui casse la session, on retire proprement les paramètres
-    del st.query_params["success"]
-
+# --- GESTION DU RETOUR DE PAIEMENT STRIPE DOUBLE SÉCURITÉ ---
+if "success" in st.query_params and st.query_params["success"] == "true":
+    st.session_state["est_abonne"] = True
 
 # Barre latérale
 st.sidebar.markdown("### 🔒 Espace Client")
@@ -97,17 +89,14 @@ def simuler_scenario_inflation(initial, mensuel, taux_nominal, inflation, annees
     capital_reel = initial
     
     taux_mensuel_nominal = (taux_nominal / 100) / 12
-    # Formule du taux d'intérêt réel net d'inflation (Fisher)
     taux_reel_annuel = ((1 + taux_nominal/100) / (1 + inflation/100) - 1) * 100
     taux_mensuel_reel = (taux_reel_annuel / 100) / 12
     
     historique = []
     for mois in range(1, (annees * 12) + 1):
-        # Calcul de la valeur brute (Nominale)
         capital_nominal += mensuel
         capital_nominal += capital_nominal * taux_mensuel_nominal
         
-        # Calcul de la valeur ajustée du pouvoir d'achat (Réelle)
         capital_reel += mensuel
         capital_reel += capital_reel * taux_mensuel_reel
         
@@ -125,7 +114,6 @@ def generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation):
     buffer = BytesIO()
     plt.figure(figsize=(10, 6))
     
-    # On trace les courbes réelles (ajustées de l'inflation) pour le PDF
     plt.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Scénario A (Réel)", color="#ff4b4b", linewidth=2)
     plt.plot(df_b.index, df_b["Pouvoir d'Achat Réel (€)"], label="Scénario B (Réel)", color="#ffa500", linewidth=2)
     plt.plot(df_c.index, df_c["Pouvoir d'Achat Réel (€)"], label="Scénario C (Réel)", color="#00d4b2", linewidth=2)
@@ -136,7 +124,6 @@ def generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation):
     plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend(loc="upper left")
     
-    # Ajout des métadonnées en texte sur le graphique
     texte_info = f"Capital Initial : {initial} €\nEffort Mensuel : {mensuel} €\nInflation annuelle : {inflation}%"
     plt.gcf().text(0.15, 0.2, texte_info, fontsize=9, bbox=dict(facecolor='white', alpha=0.8, edgecolor='#e9ecef'))
     
@@ -147,7 +134,6 @@ def generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation):
     return buffer
 
 # --- INTERFACE UTILISATEUR ---
-
 st.markdown('<div class="premium-badge">✨ VERSION 2.0 ULTIME</div>', unsafe_allow_html=True)
 st.title("Simulateur d'Épargne Haute Précision 🧠")
 st.subheader("Analysez la perte de pouvoir d'achat liée à l'inflation et téléchargez votre rapport.")
@@ -158,14 +144,12 @@ if st.session_state["est_abonne"]:
     # --- INTERFACE DÉBLOQUÉE (MEMBRES) ---
     st.success("🔓 Accès Premium Activé — Rapports PDF et Inflation débloqués")
     
-    # Paramètres macro-économiques globaux
     col_g, col_m, col_d = st.columns(3)
     with col_g:
         initial = st.number_input("Capital Initial (€)", value=10000, min_value=0, step=1000)
     with col_m:
         mensuel = st.number_input("Versement Mensuel (€)", value=250, min_value=0, step=50)
     with col_d:
-        # L'argument massue : l'inflation ajustable
         inflation = st.number_input("Taux d'Inflation Annuel Estimé (%)", value=2.5, step=0.1, min_value=0.0)
     
     annees = st.slider("Horizon d'investissement (Années)", min_value=2, max_value=40, value=15)
@@ -182,12 +166,10 @@ if st.session_state["est_abonne"]:
         st.markdown("<h5 style='color:#00d4b2;'>📈 Scénario C (Dynamique)</h5>", unsafe_allow_html=True)
         taux_c = st.number_input("Rendement Annuel C (%)", value=8.5, step=0.1, key="t_c")
     
-    # Génération des DataFrames individuels
     df_a = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_a, inflation, annees)).set_index("Année")
     df_b = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_b, inflation, annees)).set_index("Année")
     df_c = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_c, inflation, annees)).set_index("Année")
     
-    # Fusion des données pour l'affichage graphique global du Pouvoir d'Achat Réel
     df_comparatif_reel = pd.DataFrame({
         "Année": list(range(1, annees + 1)),
         "Scénario A (Pouvoir d'achat réel)": df_a["Pouvoir d'Achat Réel (€)"],
@@ -195,11 +177,9 @@ if st.session_state["est_abonne"]:
         "Scénario C (Pouvoir d'achat réel)": df_c["Pouvoir d'Achat Réel (€)"]
     }).set_index("Année")
     
-    # Rendu du graphique Principal
     st.markdown("### 📈 Trajectoire de votre Pouvoir d'Achat Réel (Net d'Inflation)")
     st.line_chart(df_comparatif_reel)
     
-    # SECTION D'EXPORT EXCLUSIVE
     st.markdown("### 📥 Outils d'export professionnels")
     pdf_file = generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation)
     
@@ -211,7 +191,6 @@ if st.session_state["est_abonne"]:
         type="primary"
     )
     
-    # Affichage technique détaillé sous forme d'onglets
     st.markdown("### 📋 Tableaux de bord détaillés par stratégie")
     tab1, tab2, tab3 = st.tabs(["📉 Prudent (A)", "⚖️ Équilibré (B)", "📈 Dynamique (C)"])
     with tab1:
@@ -221,15 +200,12 @@ if st.session_state["est_abonne"]:
     with tab3:
         st.dataframe(df_c, use_container_width=True)
 
-
 else:
-    # --- INTERFACE TEASER PRO (PAYWALL MARKETING) ---
+    # --- INTERFACE TEASER PRO (PAYWALL MARKETING COMPLET) ---
     col_gauche, col_droite = st.columns([1.2, 1], gap="large")
     
     with col_gauche:
         st.markdown("### 👀 Aperçu du moteur d'impact de l'inflation")
-        
-        # Teaser flouté montrant le split entre Valeur brute et Pouvoir d'Achat Réel
         st.markdown('<div class="blur-preview">', unsafe_allow_html=True)
         preview_df = pd.DataFrame({
             "Année": list(range(1, 11)),
@@ -254,39 +230,4 @@ else:
             <div class="feature-box" style="text-align:left;">🛡️ <b>Moteur d'Inflation Réel</b> (Calcul du pouvoir d'achat résiduel)</div>
             <div class="feature-box" style="text-align:left;">📊 <b>Comparateur Simultané</b> sur 3 profils d'investisseurs</div>
             <div class="feature-box" style="text-align:left;">📥 <b>Export PDF Instantané</b> prêt à imprimer pour vos décisions</div>
-            <div class="feature-box" style="text-align:left;">🔒 <b>Infrastructure Sécurisée Stripe</b> (Chiffrement SSL)</div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Détection automatique de l'URL de votre application en ligne pour le retour Stripe
-        url_actuelle = "https://streamlit.app"  # ⚠️ REMPLACEZ PAR VOTRE VRAIE URL STREAMLIT CLOUD
-        
-        # Génération sécurisée du bouton de paiement
-        try:
-            if not ID_PRIX_STRIPE or not stripe.api_key:
-                st.error("❌ Clés Stripe manquantes dans les Secrets Streamlit.")
-            else:
-                session_checkout = stripe.checkout.Session.create(
-    payment_method_types=['card'],
-    line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
-    mode='subscription',
-    # Utilisation de la bonne URL en ligne :
-    success_url="https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
-    cancel_url="https://monprojetfinance-3bnhwddjf723qzvswj29j7.streamlit.app/",
-    customer_email=st.session_state["email"]
-)
 
-                # Affichage du bouton premium officiel
-                st.markdown(f'<div style="text-align:center; margin-top:15px;"><a class="stripe-button" href="{session_checkout.url}" target="_blank">💳 Activer via Stripe Secure</a></div>', unsafe_allow_html=True)
-        except Exception as e:
-            # Affichage de l'erreur directement dans la colonne de droite pour comprendre le blocage
-            st.error(f"⚠️ Erreur Stripe technique : {e}")
-        
-        st.markdown("""
-            <div class="security-banner">
-                🔒 Transaction de confiance opérée par <b>Stripe</b>.<br>
-                Vos données restent privées et chiffrées.
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
