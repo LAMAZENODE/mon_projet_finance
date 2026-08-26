@@ -263,13 +263,15 @@ else:
                 st.error("❌ Clés Stripe manquantes dans les Secrets Streamlit.")
             else:
                 session_checkout = stripe.checkout.Session.create(
-                    payment_method_types=['card'],
-                    line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
-                    mode='subscription',
-                    success_url=f"{url_actuelle}/?success=true",
-                    cancel_url=f"{url_actuelle}/?success=false",
-                    customer_email=st.session_state["email"]
-                )
+    payment_method_types=['card'],
+    line_items=[{'price': ID_PRIX_STRIPE, 'quantity': 1}],
+    mode='subscription',
+    # Utilisation de la bonne URL en ligne :
+    success_url=f"{url_actuelle}/?success=true",
+    cancel_url=f"{url_actuelle}/?success=false",
+    customer_email=st.session_state["email"]
+)
+
                 # Affichage du bouton premium officiel
                 st.markdown(f'<div style="text-align:center; margin-top:15px;"><a class="stripe-button" href="{session_checkout.url}" target="_blank">💳 Activer via Stripe Secure</a></div>', unsafe_allow_html=True)
         except Exception as e:
