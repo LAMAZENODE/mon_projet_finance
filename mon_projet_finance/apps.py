@@ -1,156 +1,246 @@
+import os
+import streamlit as st
+import stripe
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import BytesIO
+
+# Configuration sécurisée via les Secrets de Streamlit
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+ID_PRIX_STRIPE = os.environ.get("STRIPE_PRICE_ID")
+
+# Configuration de la page Premium
+st.set_page_config(page_title="Calculateur Financier Premium", page_icon="💰", layout="wide")
+
+# CSS Custom de l'interface de vente et design Premium
+st.markdown("""
+    <style>
+    .premium-badge {
+        background: linear-gradient(135deg, #ffd700, #ffa500);
+        color: #111;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 12px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    .paywall-container {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    .blur-preview {
+        filter: blur(6px);
+        opacity: 0.35;
+        pointer-events: none;
+        user-select: none;
+    }
+    .feature-box {
+        padding: 12px;
+        border-left: 4px solid #635bff;
+        background: #ffffff;
+        margin-bottom: 10px;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .stripe-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #635bff, #00d4b2);
+        color: white !important;
+        font-weight: bold;
+        padding: 14px 28px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(99, 91, 255, 0.3);
+    }
+    .security-banner {
+        margin-top: 15px;
+        font-size: 13px;
+        color: #6c757d;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Simulation de la session utilisateur
+if "est_abonne" not in st.session_state:
+    st.session_state["est_abonne"] = False
+if "email" not in st.session_state:
+    st.session_state["email"] = "client@exemple.com"
+
+# Gestion du retour de paiement Stripe
+query_params = st.query_params
+if "success" in query_params and query_params["success"] == "true":
+    st.session_state["est_abonne"] = True
+    st.success("🎉 Votre abonnement a bien été activé ! Merci pour votre confiance.")
+    st.query_params.clear()
+
+# Barre latérale
+st.sidebar.markdown("### 🔒 Espace Client")
+if st.session_state["est_abonne"]:
+    st.sidebar.success("🟢 Membre Pro Actif")
+else:
+    st.sidebar.warning("⚡ Version Gratuite / Limitée")
+
+# --- MOTEUR FINANCIER AVANCÉ AVEC INFLATION ---
+def simuler_scenario_inflation(initial, mensuel, taux_nominal, inflation, annees):
+    capital_nominal = initial
+    capital_reel = initial
+    
+    taux_mensuel_nominal = (taux_nominal / 100) / 12
+    # Formule du taux d'intérêt réel net d'inflation (Fisher)
+    taux_reel_annuel = ((1 + taux_nominal/100) / (1 + inflation/100) - 1) * 100
+    taux_mensuel_reel = (taux_reel_annuel / 100) / 12
+    
+    historique = []
+    for mois in range(1, (annees * 12) + 1):
+        # Calcul de la valeur brute (Nominale)
+        capital_nominal += mensuel
+        capital_nominal += capital_nominal * taux_mensuel_nominal
+        
+        # Calcul de la valeur ajustée du pouvoir d'achat (Réelle)
+        capital_reel += mensuel
+        capital_reel += capital_reel * taux_mensuel_reel
+        
+        if mois % 12 == 0:
+            annee_actuelle = mois // 12
+            historique.append({
+                "Année": annee_actuelle,
+                "Valeur Brute (€)": round(capital_nominal, 2),
+                "Pouvoir d'Achat Réel (€)": round(capital_reel, 2)
+            })
+    return historique
+
+# --- FONCTION DE GÉNÉRATION DU RAPPORT PDF ---
+def generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation):
+    buffer = BytesIO()
+    plt.figure(figsize=(10, 6))
+    
+    # On trace les courbes réelles (ajustées de l'inflation) pour le PDF
+    plt.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Scénario A (Réel)", color="#ff4b4b", linewidth=2)
+    plt.plot(df_b.index, df_b["Pouvoir d'Achat Réel (€)"], label="Scénario B (Réel)", color="#ffa500", linewidth=2)
+    plt.plot(df_c.index, df_c["Pouvoir d'Achat Réel (€)"], label="Scénario C (Réel)", color="#00d4b2", linewidth=2)
+    
+    plt.title(f"Rapport de Performance Financière (Ajusté de l'inflation : {inflation}%)", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Années", fontsize=11)
+    plt.ylabel("Valeur de l'épargne (€)", fontsize=11)
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend(loc="upper left")
+    
+    # Ajout des métadonnées en texte sur le graphique
+    texte_info = f"Capital Initial : {initial} €\nEffort Mensuel : {mensuel} €\nInflation annuelle : {inflation}%"
+    plt.gcf().text(0.15, 0.2, texte_info, fontsize=9, bbox=dict(facecolor='white', alpha=0.8, edgecolor='#e9ecef'))
+    
+    plt.tight_layout()
+    plt.savefig(buffer, format="pdf", dpi=300)
+    plt.close()
+    buffer.seek(0)
+    return buffer
+
 # --- INTERFACE UTILISATEUR ---
 
-# Cas 1 : Utilisateur remboursé -> BLOQUÉ
-if est_rembourse:
-    st.error("❌ Accès révoqué.")
-    st.subheader(f"L'adresse e-mail {email_eleve} a été définitivement bloquée.")
-    st.write("Suite à votre demande de remboursement, votre accès au Tuteur IA a été clôturé.")
-    st.stop()
+st.markdown('<div class="premium-badge">✨ VERSION 2.0 ULTIME</div>', unsafe_allow_html=True)
+st.title("Simulateur d'Épargne Haute Précision 🧠")
+st.subheader("Analysez la perte de pouvoir d'achat liée à l'inflation et téléchargez votre rapport.")
 
-# Cas 2 : Utilisateur non payé -> PAGE DE VENTE
-elif not est_abonne:
-    st.markdown("<h1 style='text-align: center; color: #1E3A8A;'>📐 Tuteur Privé de Mathématiques IA</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; font-size: 1.2em; color: #4B5563;'>Progressez en maths 10x plus vite avec votre coach disponible 24h/24.</p>", unsafe_allow_html=True)
-    st.write("---")
+st.divider()
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("🎯 **Précision 99%**")
-        st.caption("Corrections étape par étape adaptées à votre niveau scolaire.")
-    with col2:
-        st.markdown("⚡ **Instantané**")
-        st.caption("Plus besoin d'attendre. Réponses claires en moins de 3 secondes.")
-    with col3:
-        st.markdown("🔒 **Accès Unique**")
-        st.caption("Un seul paiement de 5€. Aucun abonnement, aucun frais caché.")
-
-    st.write("---")
-
-    # Affichage des informations du produit
-    with st.expander("🔍 Détails du paiement (mode test)"):
-        st.info(f"""
-        **Produit**: prod_V4aMSxA92kIcCt
-        **Tarif**: price_1U4RBaAGivtq6O4IE1gyxeyt
-        **Prix**: 5,00 €
-        **Mode**: {'TEST' if MODE_TEST else 'PRODUCTION'}
-        """)
-
-    # ✅ CORRECTION ICI - Utilisation de guillemets simples pour éviter les conflits
-    st.markdown(
-        '<div style="background-color: #F3F4F6; padding: 20px; border-radius: 10px; border-left: 5px solid #10B981; margin-bottom: 20px;">'
-        '<h4 style="margin: 0; color: #111827;">🚀 Offre Spéciale d\'Accès Unique</h4>'
-        '<p style="font-size: 1.8em; font-weight: bold; margin: 10px 0; color: #10B981;">5,00 € <span style="font-size: 0.5em; color: #6B7280; font-weight: normal;">paiement unique (accès immédiat)</span></p>'
-        '<ul style="margin-bottom: 0; padding-left: 20px; color: #374151;">'
-        '<li>Accès complet au tuteur IA 24h/24 et 7j/7</li>'
-        '<li>Explications détaillées de TOUS vos exercices de maths</li>'
-        '<li>Garantie satisfait ou remboursé sous 14 jours (si non utilisé)</li>'
-        '<li><b>Nouveau :</b> Téléchargement des corrections au format PDF</li>'
-        '</ul>'
-        '</div>',
-        unsafe_allow_html=True
+if st.session_state["est_abonne"]:
+    # --- INTERFACE DÉBLOQUÉE (MEMBRES) ---
+    st.success("🔓 Accès Premium Activé — Rapports PDF et Inflation débloqués")
+    
+    # Paramètres macro-économiques globaux
+    col_g, col_m, col_d = st.columns(3)
+    with col_g:
+        initial = st.number_input("Capital Initial (€)", value=10000, min_value=0, step=1000)
+    with col_m:
+        mensuel = st.number_input("Versement Mensuel (€)", value=250, min_value=0, step=50)
+    with col_d:
+        # L'argument massue : l'inflation ajustable
+        inflation = st.number_input("Taux d'Inflation Annuel Estimé (%)", value=2.5, step=0.1, min_value=0.0)
+    
+    annees = st.slider("Horizon d'investissement (Années)", min_value=2, max_value=40, value=15)
+    
+    st.markdown("### 📊 Configuration des stratégies et rendements nominaux")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("<h5 style='color:#ff4b4b;'>📉 Scénario A (Prudent)</h5>", unsafe_allow_html=True)
+        taux_a = st.number_input("Rendement Annuel A (%)", value=3.0, step=0.1, key="t_a")
+    with c2:
+        st.markdown("<h5 style='color:#ffa500;'>⚖️ Scénario B (Équilibré)</h5>", unsafe_allow_html=True)
+        taux_b = st.number_input("Rendement Annuel B (%)", value=5.5, step=0.1, key="t_b")
+    with c3:
+        st.markdown("<h5 style='color:#00d4b2;'>📈 Scénario C (Dynamique)</h5>", unsafe_allow_html=True)
+        taux_c = st.number_input("Rendement Annuel C (%)", value=8.5, step=0.1, key="t_c")
+    
+    # Génération des DataFrames individuels
+    df_a = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_a, inflation, annees)).set_index("Année")
+    df_b = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_b, inflation, annees)).set_index("Année")
+    df_c = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_c, inflation, annees)).set_index("Année")
+    
+    # Fusion des données pour l'affichage graphique global du Pouvoir d'Achat Réel
+    df_comparatif_reel = pd.DataFrame({
+        "Année": list(range(1, annees + 1)),
+        "Scénario A (Pouvoir d'achat réel)": df_a["Pouvoir d'Achat Réel (€)"],
+        "Scénario B (Pouvoir d'achat réel)": df_b["Pouvoir d'Achat Réel (€)"],
+        "Scénario C (Pouvoir d'achat réel)": df_c["Pouvoir d'Achat Réel (€)"]
+    }).set_index("Année")
+    
+    # Rendu du graphique Principal
+    st.markdown("### 📈 Trajectoire de votre Pouvoir d'Achat Réel (Net d'Inflation)")
+    st.line_chart(df_comparatif_reel)
+    
+    # SECTION D'EXPORT EXCLUSIVE
+    st.markdown("### 📥 Outils d'export professionnels")
+    pdf_file = generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation)
+    
+    st.download_button(
+        label="📥 Télécharger le Rapport d'Analyse au format PDF",
+        data=pdf_file,
+        file_name="rapport_simulation_premium.pdf",
+        mime="application/pdf",
+        type="primary"
     )
+    
+    # Affichage technique détaillé sous forme d'onglets
+    st.markdown("### 📋 Tableaux de bord détaillés par stratégie")
+    tab1, tab2, tab3 = st.tabs(["📉 Prudent (A)", "⚖️ Équilibré (B)", "📈 Dynamique (C)"])
+    with tab1:
+        st.dataframe(df_a, use_container_width=True)
+    with tab2:
+        st.dataframe(df_b, use_container_width=True)
+    with tab3:
+        st.dataframe(df_c, use_container_width=True)
 
-    if st.button("💳 Débloquer mon Tuteur IA (Paiement unique 5€)", use_container_width=True, type="primary"):
-        try:
-            checkout_session = stripe.checkout.Session.create(
-                line_items=[{'price': ID_PRIX_UNIQUE, 'quantity': 1}],
-                mode='payment',
-                success_url=f"{URL_APP}?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=URL_APP,
-            )
-            
-            st.markdown(f"### [🔗 Cliquez ici pour finaliser le paiement sécurisé]({checkout_session.url})")
-            st.caption("🔒 Transaction 100% sécurisée par Stripe. Vos données bancaires sont cryptées.")
-            
-            # Afficher l'URL de la session pour débogage
-            if MODE_TEST:
-                with st.expander("🔧 Informations de débogage"):
-                    st.code(f"""
-                    Session ID: {checkout_session.id}
-                    URL de paiement: {checkout_session.url}
-                    Price ID utilisé: {ID_PRIX_UNIQUE}
-                    Mode: TEST
-                    """)
-            
-            # ✅ CORRECTION ICI - Même problème avec les guillemets
-            st.markdown(
-                '<p style="font-size: 0.8em; color: #9CA3AF; text-align: center; margin-top: 10px;">'
-                'Conformément à la loi sur les contenus numériques, en soumettant votre premier exercice, '
-                'vous demandez l\'exécution immédiate du service et renoncez expressément à votre droit de rétractation.'
-                '</p>', 
-                unsafe_allow_html=True
-            )
-            
-        except Exception as e:
-            st.error(f"❌ Erreur lors de la création du paiement : {e}")
-            if MODE_TEST:
-                st.error(f"Détails de l'erreur : {str(e)}")
-
-    st.write("---")
-    st.markdown("##### ⭐ Ce que disent nos étudiants :")
-    st.info('"Grâce à cette IA, je suis passé de 9 à 14 de moyenne en maths en seulement un mois. Les explications sont hyper claires !" – Thomas, élève de Première.')
-
-# Cas 3 : Utilisateur payé -> ACCÈS DÉBLOQUÉ
 else:
-    if MODE_TEST:
-        st.info("🔬 **MODE TEST** - Les paiements sont simulés")
+    # --- INTERFACE TEASER PRO (PAYWALL MARKETING) ---
+    col_gauche, col_droite = st.columns([1.2, 1], gap="large")
     
-    st.markdown("<h1 style='text-align: center; color: #10B981;'>🎓 Votre Espace Tuteur Privé</h1>", unsafe_allow_html=True)
-    
-    if MODE_TEST:
-        st.success(f"✅ Accès Test Activé pour **{email_eleve}**")
-        st.caption("💡 En mode test, vous pouvez utiliser toutes les fonctionnalités gratuitement")
-    else:
-        st.success(f"✨ Accès Premium Activé pour **{email_eleve}**. Posez toutes vos questions ici.")
-    
-    exercice = st.text_area("✍️ Soumettez votre exercice et votre niveau scolaire (ex: 3ème, Terminale, etc.) :", height=150)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        bouton_correction = st.button("🚀 Obtenir la correction détaillée", type="primary", use_container_width=True)
-    
-    if bouton_correction and exercice.strip():
-        with st.spinner("🔮 Votre tuteur IA analyse le problème et rédige la correction étape par étape..."):
-            try:
-                instructions = (
-                    "Tu es un tuteur privé de mathématiques hautement qualifié, pédagogue et bienveillant. "
-                    "Ton but est d'aider l'élève à comprendre son exercice, pas seulement de lui donner la réponse brute. "
-                    "1. Salue brièvement l'élève de manière encourageante.\n"
-                    "2. Rappelle brièvement les propriétés ou formules mathématiques nécessaires pour résoudre le problème.\n"
-                    "3. Propose une correction extrêmement détaillée, rédigée étape par étape.\n"
-                    "4. Utilise un langage clair, accessible et structure tes calculs avec une mise en forme soignée.\n"
-                    "5. Termine par un petit conseil ou un mot d'encouragement pour ses révisions."
-                )
-                
-                reponse_ia = client_ia.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=exercice,
-                    config=types.GenerateContentConfig(
-                        system_instruction=instructions,
-                        temperature=0.3
-                    )
-                )
-                
-                st.session_state['derniere_correction'] = reponse_ia.text
-                st.session_state['dernier_enonce'] = exercice
-                
-                st.success("✅ Correction générée avec succès !")
-                st.markdown(reponse_ia.text)
-                
-                # Bouton de téléchargement PDF
-                pdf_buffer = generer_pdf(reponse_ia.text, exercice)
-                st.download_button(
-                    label="📥 Télécharger la correction en PDF",
-                    data=pdf_buffer,
-                    file_name="correction_maths.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-                
-            except Exception as api_error:
-                st.error(f"❌ Erreur lors de l'appel à l'IA : {api_error}")
-    elif bouton_correction:
-        st.warning("⚠️ Veuillez écrire ou coller un énoncé d'exercice avant de lancer l'analyse.")
+    with col_gauche:
+        st.markdown("### 👀 Aperçu du moteur d'impact de l'inflation")
+        
+        # Teaser flouté montrant le split entre Valeur brute et Pouvoir d'Achat Réel
+        st.markdown('<div class="blur-preview">', unsafe_allow_html=True)
+        preview_df = pd.DataFrame({
+            "Année": list(range(1, 11)),
+            "Capital Brute (Fictif)": [10000 + (i*3000)*1.06**i for i in range(1, 11)],
+            "Pouvoir d'Achat Réel détruit par l'Inflation": [10000 + (i*3000)*1.02**i for i in range(1, 11)]
+        }).set_index("Année")
+        st.line_chart(preview_df)
+        st.button("Générer le Rapport PDF", disabled=True, key="btn_pdf_dis")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("#### ⚠️ Le piège invisible de l'inflation")
+        st.markdown("Avec une inflation moyenne à **2.5%**, un capital de **50 000 €** laissé sur un compte mal rémunéré perd plus de **13 500 € de pouvoir d'achat** en 10 ans. Notre outil calcule l'impact exact mois par mois pour vous éviter cela.")
+
+    with col_droite:
+        st.markdown('<div class="paywall-container">', unsafe_allow_html=True)
+
 
 
 
