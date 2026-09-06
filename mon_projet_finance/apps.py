@@ -730,8 +730,9 @@ else:
     
     st.divider()
     
-    # Bannière de confiance en bas
+    # Bannière de confiance en bas (CORRIGÉE)
     st.markdown("""
     <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; text-align: center;">
         <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; align-items: center;">
-            <span style="font-weight: 600; color
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font
