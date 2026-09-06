@@ -39,6 +39,12 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
+    /* Suppression des marges et espaces */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 0rem;
+    }
+    
     .premium-badge {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -65,12 +71,13 @@ st.markdown("""
     .paywall-premium {
         background: linear-gradient(145deg, #ffffff, #f8f9fe);
         border-radius: 20px;
-        padding: 40px 30px;
+        padding: 30px 25px 20px 25px;
         box-shadow: 0 20px 60px rgba(102, 126, 234, 0.12);
         border: 1px solid rgba(102, 126, 234, 0.08);
         text-align: center;
         position: relative;
         overflow: hidden;
+        height: 100%;
     }
     
     .paywall-premium::before {
@@ -82,12 +89,21 @@ st.markdown("""
         color: rgba(102, 126, 234, 0.04);
     }
     
+    .paywall-premium h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+    
+    .paywall-premium p {
+        margin-bottom: 15px;
+    }
+    
     .pricing-card-premium {
         background: linear-gradient(145deg, #667eea, #764ba2);
         border-radius: 16px;
-        padding: 25px;
+        padding: 20px 25px;
         color: white;
-        margin: 15px 0;
+        margin: 10px 0 15px 0;
         box-shadow: 0 10px 40px rgba(102, 126, 234, 0.35);
         position: relative;
     }
@@ -95,7 +111,7 @@ st.markdown("""
     .pricing-price-premium {
         font-size: 42px;
         font-weight: 800;
-        margin: 10px 0;
+        margin: 5px 0;
     }
     
     .pricing-price-premium span {
@@ -106,17 +122,18 @@ st.markdown("""
     
     .pricing-features-premium {
         text-align: left;
-        margin: 20px 0;
+        margin: 15px 0 5px 0;
         padding: 0;
         list-style: none;
     }
     
     .pricing-features-premium li {
-        padding: 8px 0;
+        padding: 6px 0;
         display: flex;
         align-items: center;
         gap: 10px;
         color: rgba(255,255,255,0.95);
+        font-size: 14px;
     }
     
     .pricing-features-premium li::before {
@@ -133,10 +150,11 @@ st.markdown("""
         border: 2px solid #e0e4f0;
         position: relative;
         min-height: 400px;
+        height: 100%;
     }
     
     .preview-content {
-        padding: 20px;
+        padding: 15px 20px 20px 20px;
         background: white;
         border-radius: 12px;
     }
@@ -147,7 +165,7 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.85) 70%, rgba(255,255,255,0.95) 100%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.85) 60%, rgba(255,255,255,0.95) 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -158,21 +176,21 @@ st.markdown("""
     }
     
     .preview-overlay .lock-icon {
-        font-size: 56px;
-        margin-bottom: 10px;
+        font-size: 48px;
+        margin-bottom: 8px;
     }
     
     .preview-overlay h3 {
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
         color: #1a1a2e;
         font-size: 22px;
         font-weight: 700;
     }
     
     .preview-overlay p {
-        margin: 0 0 16px 0;
+        margin: 0 0 12px 0;
         color: #6c757d;
-        font-size: 15px;
+        font-size: 14px;
         text-align: center;
     }
     
@@ -183,40 +201,41 @@ st.markdown("""
     }
     
     .preview-overlay .price-tag span {
-        padding: 6px 18px;
+        padding: 5px 16px;
         border-radius: 50px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
     }
     
     .testimonial-card {
         background: white;
-        padding: 18px 20px;
+        padding: 14px 16px;
         border-radius: 12px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         border-left: 4px solid #667eea;
         box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     }
     
     .testimonial-card .stars {
         color: #ffd700;
-        font-size: 14px;
+        font-size: 13px;
         letter-spacing: 2px;
     }
     
     .testimonial-card .author {
         font-weight: 600;
         color: #1a1a2e;
-        margin-top: 6px;
+        margin-top: 4px;
         display: flex;
         align-items: center;
         gap: 8px;
+        font-size: 14px;
     }
     
     .testimonial-card .author .role {
         font-weight: 400;
         color: #6c757d;
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .security-badge {
@@ -224,9 +243,9 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         gap: 12px;
-        font-size: 13px;
+        font-size: 12px;
         color: #6c757d;
-        margin-top: 12px;
+        margin-top: 10px;
         flex-wrap: wrap;
     }
     
@@ -238,20 +257,20 @@ st.markdown("""
     
     .metric-preview {
         background: white;
-        padding: 12px 16px;
+        padding: 10px 12px;
         border-radius: 10px;
         border: 1px solid #e9ecef;
         text-align: center;
     }
     
     .metric-preview .value {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 800;
         color: #dc3545;
     }
     
     .metric-preview .label {
-        font-size: 12px;
+        font-size: 11px;
         color: #6c757d;
         font-weight: 500;
     }
@@ -290,6 +309,15 @@ st.markdown("""
     
     .btn-pulse {
         animation: pulse 2s infinite;
+    }
+    
+    /* Supprimer les marges des colonnes */
+    .row-widget.stColumns {
+        gap: 0px;
+    }
+    
+    .stColumn {
+        padding: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -520,59 +548,60 @@ if st.session_state["est_abonne"]:
 
 else:
     # ==========================================
-    # BLOC PAYWALL AMÉLIORÉ - SANS FLU TOTAL
+    # BLOC PAYWALL SANS ESPACES VIDES
     # ==========================================
     
     # Bannière d'aperçu gratuit
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 20px 30px; border-radius: 16px; border: 1px solid #d0d3e0; margin-bottom: 30px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+    <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 15px 25px; border-radius: 16px; border: 1px solid #d0d3e0; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div>
                 <span class="free-badge">🔓 APERCU GRATUIT</span>
-                <h3 style="margin: 8px 0 4px 0;">Decouvrez ce que vous offre la version Premium</h3>
-                <p style="margin: 0; color: #6c757d;">Testez le simulateur en apercu et voyez la valeur ajoutee</p>
+                <h3 style="margin: 6px 0 2px 0; font-size: 18px;">Decouvrez ce que vous offre la version Premium</h3>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">Testez le simulateur en apercu et voyez la valeur ajoutee</p>
             </div>
             <div style="display: flex; gap: 8px;">
-                <span style="background: #ffd700; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px;">⭐ 5 etoiles</span>
-                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px;">✅ Satisfait ou rembourse</span>
+                <span style="background: #ffd700; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">⭐ 5 etoiles</span>
+                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">✅ Satisfait ou rembourse</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    col_pay, col_prev = st.columns([1, 1.3], gap="large")
+    # Colonnes collées sans espaces
+    col_pay, col_prev = st.columns([1, 1.3], gap="small")
     
     with col_pay:
         st.markdown("""
         <div class="paywall-premium">
-            <h2 style="margin-top: 0;">🔒 Acces Premium</h2>
-            <p style="color: #6c757d; font-size: 15px;">Debloquez la puissance totale<br>de notre simulateur financier.</p>
+            <h2 style="font-size: 24px;">🔒 Acces Premium</h2>
+            <p style="color: #6c757d; font-size: 14px; margin-bottom: 10px;">Debloquez la puissance totale<br>de notre simulateur financier.</p>
             
             <div class="pricing-card-premium">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
-                    <span style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px; font-size: 12px;">⭐ OFFRE POPULAIRE</span>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 2px;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px; font-size: 11px;">⭐ OFFRE POPULAIRE</span>
                 </div>
-                <div class="pricing-price-premium">
-                    9,00€ <span>/ mois</span>
+                <div class="pricing-price-premium" style="font-size: 36px; margin: 5px 0;">
+                    9,00€ <span style="font-size: 16px;">/ mois</span>
                 </div>
-                <div style="margin: -8px 0 12px 0; font-size: 14px; opacity: 0.8;">
+                <div style="margin: -5px 0 10px 0; font-size: 13px; opacity: 0.8;">
                     soit seulement 0,30€ par jour
                 </div>
-                <ul class="pricing-features-premium">
-                    <li>Simulations illimitees</li>
-                    <li>Comparaison multi-scenarios</li>
-                    <li>Graphiques avances interactifs</li>
-                    <li>Exports PDF haute resolution</li>
-                    <li>Analyse personnalisee</li>
-                    <li>Annulation en 1 clic</li>
+                <ul class="pricing-features-premium" style="margin: 10px 0 5px 0;">
+                    <li style="font-size: 13px; padding: 4px 0;">Simulations illimitees</li>
+                    <li style="font-size: 13px; padding: 4px 0;">Comparaison multi-scenarios</li>
+                    <li style="font-size: 13px; padding: 4px 0;">Graphiques avances interactifs</li>
+                    <li style="font-size: 13px; padding: 4px 0;">Exports PDF haute resolution</li>
+                    <li style="font-size: 13px; padding: 4px 0;">Analyse personnalisee</li>
+                    <li style="font-size: 13px; padding: 4px 0;">Annulation en 1 clic</li>
                 </ul>
             </div>
             
-            <div style="margin-top: 16px;">
-                <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
-                    <label style="font-weight: 600; font-size: 14px; display: block; text-align: left; margin-bottom: 6px;">📧 Votre email :</label>
+            <div style="margin-top: 12px;">
+                <div style="background: white; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+                    <label style="font-weight: 600; font-size: 13px; display: block; text-align: left; margin-bottom: 6px;">📧 Votre email :</label>
                     <input type="email" id="email_input_paywall" placeholder="vous@exemple.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
-                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35); transition: all 0.3s;" class="btn-pulse">
+                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px; border: none; border-radius: 50px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35); transition: all 0.3s;" class="btn-pulse">
                         🔓 DEBLOQUER MAINTENANT
                     </button>
                 </div>
@@ -590,10 +619,10 @@ else:
             else:
                 checkout_url = creer_session_paiement()
                 if checkout_url:
-                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 10px; font-size: 16px;">💳 Payer securise via Stripe</a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 10px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 8px; font-size: 14px;">💳 Payer securise via Stripe</a>', unsafe_allow_html=True)
         
         st.markdown("""
-        <div class="security-badge">
+        <div class="security-badge" style="margin-top: 8px;">
             <span>🔒 100% securise</span>
             <span>🔄 Annulation facile</span>
             <span>💳 Stripe</span>
@@ -601,42 +630,40 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        st.divider()
+        st.markdown("---")
         
         st.markdown("### 💬 Ce qu'en disent nos utilisateurs")
         st.markdown("""
-        <div class="testimonial-card">
+        <div class="testimonial-card" style="padding: 12px 14px; margin-bottom: 8px;">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-style: italic; margin: 6px 0;">"Cet outil m'a fait realiser l'impact reel de l'inflation sur mon livret A. J'ai reaguste mes investissements immediatement. Les 9€ sont rentabilises au centuple !"</p>
-            <div class="author">Thomas R. <span class="role">— Entrepreneur</span></div>
+            <p style="font-style: italic; margin: 4px 0; font-size: 13px;">"Cet outil m'a fait realiser l'impact reel de l'inflation. Les 9€ sont rentabilises au centuple !"</p>
+            <div class="author" style="margin-top: 2px; font-size: 13px;">Thomas R. <span class="role">— Entrepreneur</span></div>
         </div>
-        <div class="testimonial-card">
+        <div class="testimonial-card" style="padding: 12px 14px; margin-bottom: 8px;">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-style: italic; margin: 6px 0;">"Les graphiques comparatifs sont ultra clairs. L'export PDF est parfait pour faire des points financiers en famille."</p>
-            <div class="author">Sarah M. <span class="role">— Cadre Financier</span></div>
+            <p style="font-style: italic; margin: 4px 0; font-size: 13px;">"Les graphiques comparatifs sont ultra clairs. L'export PDF est parfait."</p>
+            <div class="author" style="margin-top: 2px; font-size: 13px;">Sarah M. <span class="role">— Cadre Financier</span></div>
         </div>
-        <div class="testimonial-card">
+        <div class="testimonial-card" style="padding: 12px 14px; margin-bottom: 0;">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-style: italic; margin: 6px 0;">"Enfin un simulateur qui montre la verite sur l'epargne ! L'inflation est un ennemi silencieux, cet outil le rend visible."</p>
-            <div class="author">David L. <span class="role">— Ingenieur</span></div>
+            <p style="font-style: italic; margin: 4px 0; font-size: 13px;">"Enfin un simulateur qui montre la verite sur l'epargne !"</p>
+            <div class="author" style="margin-top: 2px; font-size: 13px;">David L. <span class="role">— Ingenieur</span></div>
         </div>
         """, unsafe_allow_html=True)
     
     with col_prev:
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <h3 style="margin: 0;">🔍 Apercu interactif</h3>
-            <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">DEMO</span>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 20px;">🔍 Apercu interactif</h3>
+            <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">DEMO</span>
         </div>
         """, unsafe_allow_html=True)
         st.caption("👆 Voici un apercu de ce que vous pourrez analyser en detail")
         
-        # Conteneur avec aperçu (sans flou, mais avec overlay)
         st.markdown('<div class="preview-container">', unsafe_allow_html=True)
         st.markdown('<div class="preview-content">', unsafe_allow_html=True)
         
-        # Métriques d'aperçu (visibles)
-        col_m1, col_m2 = st.columns(2)
+        col_m1, col_m2 = st.columns(2, gap="small")
         with col_m1:
             st.markdown("""
             <div class="metric-preview">
@@ -652,7 +679,6 @@ else:
             </div>
             """, unsafe_allow_html=True)
         
-        # Graphique d'aperçu (visible mais en version simplifiée)
         data_preview = pd.DataFrame({
             "Années": list(range(1, 16)),
             "Livret A (3%)": [10000 * (1.03**i) for i in range(1, 16)],
@@ -661,7 +687,6 @@ else:
         
         st.line_chart(data_preview, use_container_width=True)
         
-        # Tableau d'aperçu
         st.dataframe(
             data_preview.round(0).head(5),
             use_container_width=True,
@@ -672,15 +697,14 @@ else:
         )
         
         st.markdown("""
-        <div style="background: #fff3cd; padding: 12px 16px; border-radius: 8px; margin-top: 8px; border-left: 4px solid #ffc107;">
-            <strong>💡 Le saviez-vous ?</strong>
-            <span style="color: #6c757d; font-size: 14px;">En 10 ans, l'inflation peut reduire de 20% le pouvoir d'achat de votre epargne.</span>
+        <div style="background: #fff3cd; padding: 10px 14px; border-radius: 8px; margin-top: 6px; border-left: 4px solid #ffc107;">
+            <strong style="font-size: 13px;">💡 Le saviez-vous ?</strong>
+            <span style="color: #6c757d; font-size: 13px;">En 10 ans, l'inflation peut reduire de 20% le pouvoir d'achat de votre epargne.</span>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # fin preview-content
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        # Overlay avec CTA (semi-transparent)
         st.markdown("""
         <div class="preview-overlay">
             <span class="lock-icon">🔒</span>
@@ -693,18 +717,17 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # fin preview-container
+        st.markdown('</div>', unsafe_allow_html=True)
     
     st.divider()
     
-    # Bannière de confiance
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; text-align: center;">
-        <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; align-items: center;">
-            <div><span style="font-weight: 600;">🔒 Paiement 100% securise</span></div>
-            <div><span style="font-weight: 600;">🔄 Annulation a tout moment</span></div>
-            <div><span style="font-weight: 600;">💳 Stripe Certified</span></div>
-            <div><span style="font-weight: 600;">📱 Support 7j/7</span></div>
+    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 12px; text-align: center;">
+        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; align-items: center;">
+            <div><span style="font-weight: 600; font-size: 13px;">🔒 Paiement 100% securise</span></div>
+            <div><span style="font-weight: 600; font-size: 13px;">🔄 Annulation a tout moment</span></div>
+            <div><span style="font-weight: 600; font-size: 13px;">💳 Stripe Certifie</span></div>
+            <div><span style="font-weight: 600; font-size: 13px;">📱 Support 7j/7</span></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
