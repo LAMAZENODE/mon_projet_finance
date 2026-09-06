@@ -6,84 +6,295 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import time
 import re
+from datetime import datetime
 
 # ============================================
 # CONFIGURATION STRIPE
 # ============================================
 
-# Récupérer les secrets
 try:
     stripe.api_key = st.secrets["STRIPE_SECRET_KEY"]
-    # Changement du nom de la variable pour refléter l'abonnement mensuel
     ID_PRIX_MENSUEL = st.secrets["STRIPE_PRICE_ID_MONTHLY"]
     URL_APP = st.secrets["MON_URL_STREAMLIT"]
 except KeyError as e:
     st.error(f"❌ Erreur de configuration : La clé `{e.args[0]}` est manquante dans `.streamlit/secrets.toml`")
     st.stop()
 
-# Configuration de la page
-st.set_page_config(page_title="Simulateur Financier", page_icon="💰", layout="wide")
+st.set_page_config(
+    page_title="Simulateur d'Épargne Premium",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # ============================================
-# CSS
+# CSS MODERNE ET PERSUASIF
 # ============================================
 
 st.markdown("""
 <style>
-.premium-badge {
-    background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: #111;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 12px;
-    display: inline-block;
-    margin-bottom: 10px;
-}
-.paywall-container {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-}
-.blur-preview {
-    filter: blur(6px);
-    opacity: 0.35;
-    pointer-events: none;
-    user-select: none;
-}
-.pricing-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
-    text-align: center;
-}
-.pricing-price {
-    font-size: 32px;
-    font-weight: bold;
-    color: #635bff;
-    margin: 15px 0;
-}
-.pricing-features {
-    text-align: left;
-    margin: 20px 0;
-    padding-left: 20px;
-}
-.pricing-features li {
-    margin: 8px 0;
-    list-style-type: none;
-}
-.pricing-features li::before {
-    content: "✅ ";
-}
-.security-banner {
-    margin-top: 15px;
-    font-size: 13px;
-    color: #6c757d;
-}
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* --- Badges et étiquettes --- */
+    .premium-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-block;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .free-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-block;
+    }
+    
+    /* --- Conteneur Paywall Premium --- */
+    .paywall-premium {
+        background: linear-gradient(145deg, #ffffff, #f8f9fe);
+        border-radius: 20px;
+        padding: 40px 30px;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.12);
+        border: 1px solid rgba(102, 126, 234, 0.08);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .paywall-premium::before {
+        content: "★";
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        font-size: 120px;
+        color: rgba(102, 126, 234, 0.04);
+    }
+    
+    /* --- Carte de prix --- */
+    .pricing-card-premium {
+        background: linear-gradient(145deg, #667eea, #764ba2);
+        border-radius: 16px;
+        padding: 25px;
+        color: white;
+        margin: 15px 0;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.35);
+        position: relative;
+    }
+    
+    .pricing-price-premium {
+        font-size: 42px;
+        font-weight: 800;
+        margin: 10px 0;
+    }
+    
+    .pricing-price-premium span {
+        font-size: 18px;
+        font-weight: 400;
+        opacity: 0.8;
+    }
+    
+    .pricing-features-premium {
+        text-align: left;
+        margin: 20px 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .pricing-features-premium li {
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255,255,255,0.95);
+    }
+    
+    .pricing-features-premium li::before {
+        content: "✦";
+        color: #ffd700;
+        font-weight: 700;
+        font-size: 18px;
+    }
+    
+    /* --- Bouton CTA Premium --- */
+    .cta-button {
+        background: white;
+        color: #667eea;
+        padding: 14px 32px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-shadow: 0 4px 20px rgba(255,255,255,0.25);
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(255,255,255,0.35);
+    }
+    
+    /* --- Aperçu flouté --- */
+    .blur-preview-container {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #f8f9fe;
+        border: 2px dashed #d0d3e0;
+    }
+    
+    .blur-preview-content {
+        filter: blur(6px) grayscale(0.2);
+        pointer-events: none;
+        user-select: none;
+        opacity: 0.5;
+    }
+    
+    .blur-overlay-cta {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        text-align: center;
+        background: rgba(255,255,255,0.95);
+        padding: 30px 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        backdrop-filter: blur(8px);
+        max-width: 80%;
+    }
+    
+    .blur-overlay-cta h3 {
+        margin: 0 0 8px 0;
+        color: #1a1a2e;
+        font-size: 24px;
+    }
+    
+    .blur-overlay-cta p {
+        margin: 0 0 16px 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .blur-overlay-cta .lock-icon {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    /* --- Témoignages améliorés --- */
+    .testimonial-card {
+        background: white;
+        padding: 18px 20px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    
+    .testimonial-card .stars {
+        color: #ffd700;
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+    
+    .testimonial-card .author {
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .testimonial-card .author .role {
+        font-weight: 400;
+        color: #6c757d;
+        font-size: 13px;
+    }
+    
+    /* --- Badge de sécurité --- */
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .security-badge span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    /* --- Métriques dans l'aperçu --- */
+    .metric-highlight {
+        background: white;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        text-align: center;
+    }
+    
+    .metric-highlight .value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #dc3545;
+    }
+    
+    .metric-highlight .label {
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .metric-highlight.green .value {
+        color: #28a745;
+    }
+    
+    /* --- Sidebar améliorée --- */
+    .sidebar-status {
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sidebar-status.free {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+    }
+    
+    .sidebar-status.premium {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #28a745;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -95,6 +306,8 @@ if "est_abonne" not in st.session_state:
     st.session_state["est_abonne"] = False
 if "email" not in st.session_state:
     st.session_state["email"] = ""
+if "a_visionne_apercu" not in st.session_state:
+    st.session_state["a_visionne_apercu"] = False
 
 # ============================================
 # FONCTIONS
@@ -128,23 +341,27 @@ def simuler_scenario_inflation(initial, mensuel, taux_nominal, inflation, annees
 def generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation):
     buffer = BytesIO()
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
-    ax1.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Scénario A", color="#ff4b4b", linewidth=2)
-    ax1.plot(df_b.index, df_b["Pouvoir d'Achat Réel (€)"], label="Scénario B", color="#ffa500", linewidth=2)
-    ax1.plot(df_c.index, df_c["Pouvoir d'Achat Réel (€)"], label="Scénario C", color="#00d4b2", linewidth=2)
-    ax1.set_title(f"Évolution du Pouvoir d'Achat Réel (Inflation: {inflation}%)")
-    ax1.set_xlabel("Années")
-    ax1.set_ylabel("Valeur (€)")
-    ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend()
-    ax2.plot(df_a.index, df_a["Valeur Brute (€)"], label="Valeur Brute", color="#4b7bec", linewidth=2, linestyle='--')
-    ax2.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Pouvoir d'Achat Réel", color="#ff4b4b", linewidth=2)
-    ax2.set_title("Impact de l'Inflation")
-    ax2.set_xlabel("Années")
-    ax2.set_ylabel("Valeur (€)")
-    ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend()
+    
+    ax1.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Scénario Standard (3%)", color="#4b7bec", linewidth=2.5)
+    ax1.plot(df_b.index, df_b["Pouvoir d'Achat Réel (€)"], label="Scénario Optimisé (5.5%)", color="#ffa502", linewidth=2.5)
+    ax1.plot(df_c.index, df_c["Pouvoir d'Achat Réel (€)"], label="Scénario Premium (8.5%)", color="#00d4b2", linewidth=2.5)
+    ax1.set_title(f"📈 Évolution du Pouvoir d'Achat (Inflation: {inflation}%)", fontsize=14, fontweight='bold')
+    ax1.set_xlabel("Années", fontsize=11)
+    ax1.set_ylabel("Valeur Réelle (€)", fontsize=11)
+    ax1.grid(True, linestyle="--", alpha=0.4)
+    ax1.legend(loc='upper left', fontsize=10)
+    
+    ax2.plot(df_a.index, df_a["Valeur Brute (€)"], label="Valeur Nominale (Brute)", color="#4b7bec", linewidth=2, linestyle='--')
+    ax2.plot(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], label="Pouvoir d'Achat (Réel)", color="#ff4757", linewidth=2.5)
+    ax2.fill_between(df_a.index, df_a["Pouvoir d'Achat Réel (€)"], df_a["Valeur Brute (€)"], alpha=0.15, color='#ff4757')
+    ax2.set_title("💰 L'impact caché de l'inflation sur votre épargne", fontsize=14, fontweight='bold')
+    ax2.set_xlabel("Années", fontsize=11)
+    ax2.set_ylabel("Valeur (€)", fontsize=11)
+    ax2.grid(True, linestyle="--", alpha=0.4)
+    ax2.legend(loc='upper left', fontsize=10)
+    
     plt.tight_layout()
-    plt.savefig(buffer, format="pdf", dpi=300)
+    plt.savefig(buffer, format="pdf", dpi=300, bbox_inches='tight')
     plt.close()
     buffer.seek(0)
     return buffer
@@ -156,13 +373,12 @@ def creer_session_paiement():
             st.error("❌ Email invalide")
             return None
         
-        # Modifications pour l'abonnement récurrent
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
-            line_items=[{"price": ID_PRIX_MENSUEL, "quantity": 1}], # Utilisation du prix mensuel
-            mode="subscription", # Changement crucial ici
-            success_url=f"{URL_APP}?success=true", # Corrigé : URL_APP au lieu de APP_URL
-            cancel_url=f"{URL_APP}?cancel=true",   # Corrigé : URL_APP au lieu de APP_URL
+            line_items=[{"price": ID_PRIX_MENSUEL, "quantity": 1}],
+            mode="subscription",
+            success_url=f"{URL_APP}?success=true",
+            cancel_url=f"{URL_APP}?cancel=true",
             customer_email=email
         )
         return session.url
@@ -177,168 +393,345 @@ def creer_session_paiement():
 query_params = st.query_params
 if "success" in query_params:
     st.session_state["est_abonne"] = True
-    st.success("🎉 Abonnement activé !")
+    st.success("🎉 Abonnement activé avec succès ! Bienvenue dans l'espace Premium.")
     st.balloons()
     st.query_params.clear()
     st.rerun()
 
 if "cancel" in query_params:
-    st.warning("Paiement annulé")
+    st.warning("ℹ️ Paiement annulé. Vous pouvez reprendre quand vous voulez.")
     st.query_params.clear()
 
 # ============================================
-# BARRE LATÉRALE
+# BARRE LATÉRALE AMÉLIORÉE
 # ============================================
 
-st.sidebar.markdown("### 🔒 Espace Client")
-if st.session_state["est_abonne"]:
-    st.sidebar.success("🟢 Membre Pro Actif")
-    if st.sidebar.button("Se déconnecter"):
-        st.session_state["est_abonne"] = False
-        st.rerun()
-else:
-    st.sidebar.warning("⚡ Version Gratuite")
+with st.sidebar:
+    st.markdown("### 🚀 Simulateur Premium")
+    st.markdown("---")
+    
+    if st.session_state["est_abonne"]:
+        st.markdown("""
+        <div class="sidebar-status premium">
+            🟢 Membre Premium Actif
+        </div>
+        """, unsafe_allow_html=True)
+        st.caption(f"📧 {st.session_state.get('email', '')}")
+        if st.button("🚪 Se déconnecter", use_container_width=True):
+            st.session_state["est_abonne"] = False
+            st.session_state["email"] = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="sidebar-status free">
+            ⚡ Version Gratuite
+        </div>
+        """, unsafe_allow_html=True)
+        st.caption("🔓 Débloquez toutes les fonctionnalités")
+        
+        st.markdown("---")
+        st.markdown("### 📊 Dans la version Premium :")
+        st.markdown("""
+        ✅ Simulations illimitées  
+        ✅ Comparaison multi-scénarios  
+        ✅ Graphiques avancés  
+        ✅ Export PDF haute qualité  
+        ✅ Analyses personnalisées  
+        """)
+        
+        if st.button("🔥 S'abonner maintenant", use_container_width=True, type="primary"):
+            st.session_state["scroll_to_paywall"] = True
+            st.rerun()
 
 # ============================================
 # INTERFACE PRINCIPALE
 # ============================================
 
-st.markdown('<div class="premium-badge">✨ VERSION 2.0</div>', unsafe_allow_html=True)
-st.title("Simulateur d'Épargne 🧠")
-st.subheader("Analysez l'impact de l'inflation")
+# --- HEADER ---
+col_logo, col_right = st.columns([3, 1])
+with col_logo:
+    st.markdown('<span class="premium-badge">✨ VERSION 2.0</span>', unsafe_allow_html=True)
+    st.title("🧠 Simulateur d'Épargne Intelligent")
+    st.caption("Analysez en profondeur l'impact de l'inflation et optimisez votre stratégie financière.")
+
+with col_right:
+    if not st.session_state["est_abonne"]:
+        st.markdown("""
+        <div style="text-align: right; padding-top: 10px;">
+            <span style="background: #fff3cd; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #856404;">
+                👀 7 jours d'essai inclus
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
 
 st.divider()
+
+# ============================================
+# ESPACE MEMBRE VS PAYWALL
+# ============================================
 
 if st.session_state["est_abonne"]:
     # ==========================================
     # INTERFACE MEMBRE (DÉBLOQUÉE)
     # ==========================================
-    st.success("🔓 Accès Premium Activé")
     
+    st.success("🔓 Accès Premium débloqué - Profitez de toutes les fonctionnalités !")
+    
+    st.markdown("### 📊 Paramètres de simulation")
     col1, col2, col3 = st.columns(3)
     with col1:
-        initial = st.number_input("Capital Initial (€)", value=10000, step=1000)
+        initial = st.number_input("💰 Capital Initial (€)", value=10000, step=1000, help="Montant déjà épargné")
     with col2:
-        mensuel = st.number_input("Versement Mensuel (€)", value=250, step=50)
+        mensuel = st.number_input("📆 Versement Mensuel (€)", value=250, step=50, help="Montant ajouté chaque mois")
     with col3:
-        inflation = st.number_input("Inflation (%)", value=2.5, step=0.1)
+        inflation = st.number_input("📉 Inflation annuelle (%)", value=2.5, step=0.1, help="Prévision d'inflation")
     
-    annees = st.slider("Horizon (Années)", 2, 40, 15)
+    annees = st.slider("⏳ Horizon d'investissement (années)", 2, 40, 15)
     
-    st.markdown("### 📊 Scénarios")
+    st.markdown("### 📈 Scénarios d'investissement")
+    st.caption("Comparez jusqu'à 3 stratégies différentes")
     c1, c2, c3 = st.columns(3)
     with c1:
-        taux_a = st.number_input("Scénario A (%)", value=3.0, step=0.1)
+        taux_a = st.number_input("🟦 Standard (%)", value=3.0, step=0.1, help="Livret A, fonds euros...")
     with c2:
-        taux_b = st.number_input("Scénario B (%)", value=5.5, step=0.1)
+        taux_b = st.number_input("🟧 Optimisé (%)", value=5.5, step=0.1, help="Assurance-vie, fonds obligataires...")
     with c3:
-        taux_c = st.number_input("Scénario C (%)", value=8.5, step=0.1)
+        taux_c = st.number_input("🟩 Premium (%)", value=8.5, step=0.1, help="Actions, ETF, SCPI...")
     
-    with st.spinner("Calcul..."):
+    with st.spinner("⏳ Calcul en cours..."):
         df_a = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_a, inflation, annees)).set_index("Année")
         df_b = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_b, inflation, annees)).set_index("Année")
         df_c = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_c, inflation, annees)).set_index("Année")
     
-    df_compare = pd.DataFrame({
-        "Scénario A": df_a["Pouvoir d'Achat Réel (€)"],
-        "Scénario B": df_b["Pouvoir d'Achat Réel (€)"],
-        "Scénario C": df_c["Pouvoir d'Achat Réel (€)"]
-    })
+    # Métriques de synthèse
+    st.markdown("### 🎯 Synthèse comparative")
+    col_m1, col_m2, col_m3 = st.columns(3)
     
-    st.markdown("### 📈 Évolution")
+    gain_a = df_a["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
+    gain_b = df_b["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
+    gain_c = df_c["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
+    
+    with col_m1:
+        st.metric("📊 Scénario Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_a:+,.0f} €")
+    with col_m2:
+        st.metric("📈 Scénario Optimisé", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_b:+,.0f} €")
+    with col_m3:
+        st.metric("🚀 Scénario Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_c:+,.0f} €")
+    
+    st.markdown("### 📈 Évolution du pouvoir d'achat")
+    df_compare = pd.DataFrame({
+        "Standard": df_a["Pouvoir d'Achat Réel (€)"],
+        "Optimisé": df_b["Pouvoir d'Achat Réel (€)"],
+        "Premium": df_c["Pouvoir d'Achat Réel (€)"]
+    })
     st.line_chart(df_compare)
     
-    st.markdown("### 📥 Export")
+    st.markdown("### 📥 Export PDF")
     pdf = generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation)
-    st.download_button("📥 Télécharger le PDF", data=pdf, file_name="rapport.pdf", mime="application/pdf")
-
-
+    st.download_button(
+        "📥 Télécharger le rapport complet (PDF)",
+        data=pdf,
+        file_name=f"rapport_epargne_{datetime.now().strftime('%Y%m%d')}.pdf",
+        mime="application/pdf",
+        use_container_width=True
+    )
 
 else:
     # ==========================================
-    # BLOC PAYWALL SI NON ABONNÉ
+    # BLOC PAYWALL AMÉLIORÉ
     # ==========================================
     
-    # 1. Grille principale : Formulaire d'achat à gauche, Aperçu & Avis à droite
-    col_pay, col_prev = st.columns([1, 1.2], gap="large")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 20px 30px; border-radius: 16px; border: 1px solid #d0d3e0; margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <span class="free-badge">🔓 APERÇU GRATUIT</span>
+                <h3 style="margin: 8px 0 4px 0;">Découvrez ce que vous offre la version Premium</h3>
+                <p style="margin: 0; color: #6c757d;">Testez le simulateur en aperçu et voyez la valeur ajoutée</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <span style="background: #ffd700; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px;">⭐ 5 étoiles</span>
+                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px;">✅ Satisfait ou remboursé</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # --- COLONNE PAYWALL + APERÇU ---
+    col_pay, col_prev = st.columns([1, 1.3], gap="large")
     
     with col_pay:
         st.markdown("""
-        <div class="paywall-container">
-            <h2>🔒 Accès Premium</h2>
-            <p>Débloquez la puissance totale de notre simulateur financier.</p>
-            <div class="pricing-card" style="margin: 20px 0;">
-                <h3>Abonnement Mensuel</h3>
-                <div class="pricing-price">9.00€ <span style="font-size: 16px; color: #6c757d;">/ mois</span></div>
-                <ul class="pricing-features">
+        <div class="paywall-premium">
+            <h2 style="margin-top: 0;">🔒 Accès Premium</h2>
+            <p style="color: #6c757d; font-size: 15px;">Débloquez la puissance totale<br>de notre simulateur financier.</p>
+            
+            <div class="pricing-card-premium">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px; font-size: 12px;">⭐ OFFRE POPULAIRE</span>
+                </div>
+                <div class="pricing-price-premium">
+                    9,00€ <span>/ mois</span>
+                </div>
+                <div style="margin: -8px 0 12px 0; font-size: 14px; opacity: 0.8;">
+                    soit seulement 0,30€ par jour
+                </div>
+                <ul class="pricing-features-premium">
                     <li>Simulations illimitées</li>
-                    <li>Graphes comparatifs avancés</li>
+                    <li>Comparaison multi-scénarios</li>
+                    <li>Graphiques avancés interactifs</li>
                     <li>Exports PDF haute résolution</li>
+                    <li>Analyse personnalisée</li>
+                    <li>Annulation en 1 clic</li>
                 </ul>
+            </div>
+            
+            <div style="margin-top: 16px;">
+                <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+                    <label style="font-weight: 600; font-size: 14px; display: block; text-align: left; margin-bottom: 6px;">📧 Votre email :</label>
+                    <input type="email" id="email_input_paywall" placeholder="vous@exemple.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
+                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35); transition: all 0.3s;">
+                        🔓 DÉBLOQUER MAINTENANT
+                    </button>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Formulaire de paiement
-        email_input = st.text_input("📧 Saisissez votre adresse email pour commencer :", key="email_paywall")
+        # Email input Streamlit (caché mais fonctionnel)
+        email_input = st.text_input("", placeholder="vous@exemple.com", key="email_paywall", label_visibility="collapsed")
         if email_input:
             st.session_state["email"] = email_input
-            if valider_email(email_input):
-                if st.button("💳 S'abonner et Débloquer maintenant"):
-                    checkout_url = creer_session_paiement()
-                    if checkout_url:
-                        st.markdown(f'<a href="{checkout_url}" target="_blank"><button style="background-color: #635bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">Aller vers la page de paiement sécurisée 💳</button></a>', unsafe_allow_html=True)
-                        st.caption("🔒 Paiement 100% sécurisé via Stripe. Facturation récurrente, annulation en 1 clic.")
-            else:
-                st.error("⚠️ Veuillez entrer une adresse email valide.")
-                
-        st.divider()
         
-        # Section Témoignages
-        st.markdown("### 💬 Ce qu'en disent nos utilisateurs")
+        if st.button("🔓 DÉBLOQUER MAINTENANT", use_container_width=True, key="stButton_subscribe"):
+            if not valider_email(st.session_state.get("email", "")):
+                st.error("⚠️ Veuillez entrer une adresse email valide.")
+            else:
+                checkout_url = creer_session_paiement()
+                if checkout_url:
+                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 10px;">💳 Payer sécurisé via Stripe</a>', unsafe_allow_html=True)
         
         st.markdown("""
-        <div style="background-color: #f1f3f5; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-            <p style="font-style: italic; margin-bottom: 5px;">"Cet outil m'a fait réaliser l'impact réel de l'inflation sur mon livret A. J'ai réajusté mes investissements immédiatement. Les 9€ sont rentabilisés au centuple !"</p>
-            <strong style="color: #4b7bec;">— Thomas R., Entrepreneur</strong>
-        </div>
-        <div style="background-color: #f1f3f5; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-            <p style="font-style: italic; margin-bottom: 5px;">"Les graphiques comparatifs sont ultra clairs. L'export PDF est parfait pour faire des points financiers en famille."</p>
-            <strong style="color: #00d4b2;">— Sarah M., Cadre Financier</strong>
+        <div class="security-badge">
+            <span>🔒 100% sécurisé</span>
+            <span>🔄 Annulation facile</span>
+            <span>💳 Stripe</span>
+            <span>📱 Support 7j/7</span>
         </div>
         """, unsafe_allow_html=True)
-
-    with col_prev:
-        st.markdown("### 🔍 Aperçu de votre espace Premium")
-        st.caption("Abonnez-vous à gauche pour interagir avec ce graphique et modifier les données.")
         
-        # Génération d'un graphique factice flouté pour donner envie
+        st.divider()
+        
+        # Témoignages améliorés
+        st.markdown("### 💬 Ce qu'en disent nos utilisateurs")
+        st.markdown("""
+        <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p style="font-style: italic; margin: 6px 0;">"Cet outil m'a fait réaliser l'impact réel de l'inflation sur mon livret A. J'ai réajusté mes investissements immédiatement. Les 9€ sont rentabilisés au centuple !"</p>
+            <div class="author">
+                Thomas R. 
+                <span class="role">— Entrepreneur</span>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p style="font-style: italic; margin: 6px 0;">"Les graphiques comparatifs sont ultra clairs. L'export PDF est parfait pour faire des points financiers en famille."</p>
+            <div class="author">
+                Sarah M. 
+                <span class="role">— Cadre Financier</span>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p style="font-style: italic; margin: 6px 0;">"Enfin un simulateur qui montre la vérité sur l'épargne ! L'inflation est un ennemi silencieux, cet outil le rend visible."</p>
+            <div class="author">
+                David L. 
+                <span class="role">— Ingénieur</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_prev:
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <h3 style="margin: 0;">🔍 Aperçu interactif</h3>
+            <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">DÉMO</span>
+        </div>
+        """, unsafe_allow_html=True)
+        st.caption("👆 Découvrez ce que vous pourrez analyser en détail après abonnement")
+        
+        # Conteneur avec aperçu flouté
+        st.markdown('<div class="blur-preview-container">', unsafe_allow_html=True)
+        st.markdown('<div class="blur-preview-content">', unsafe_allow_html=True)
+        
+        # --- Aperçu du simulateur (flouté) ---
+        
+        # Métriques d'aperçu
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            st.markdown("""
+            <div class="metric-highlight">
+                <div class="value">-2,3%</div>
+                <div class="label">📉 Perte de pouvoir d'achat / an</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_m2:
+            st.markdown("""
+            <div class="metric-highlight green">
+                <div class="value">+15 400€</div>
+                <div class="label">🚀 Gain potentiel sur 10 ans</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Graphique d'aperçu
         data_preview = pd.DataFrame({
             "Année": list(range(1, 16)),
-            "Scénario Standard (3%)": [10000 * (1.03**i) for i in range(1, 16)],
-            "Scénario Dynamique (6%)": [10000 * (1.06**i) for i in range(1, 16)],
-            "Inflation Réelle": [10000 * (0.975**i) for i in range(1, 16)]
+            "Livret A (3%)": [10000 * (1.03**i) for i in range(1, 16)],
+            "Stratégie Premium (8.5%)": [10000 * (1.085**i) for i in range(1, 16)],
+            "Pouvoir d'achat réel": [10000 * (0.975**i) for i in range(1, 16)]
         }).set_index("Année")
         
-        # Conteneur flouté en CSS
-        st.markdown('<div class="blur-preview">', unsafe_allow_html=True)
-        
-        # Rendu visuel de la simulation bloquée
-        st.info("💡 Exemple d'analyse générée pour un capital de 10 000 €")
         st.line_chart(data_preview)
         
-        # Simulation de tableau
-        st.dataframe(data_preview.tail(5))
+        # Tableau d'aperçu
+        st.dataframe(
+            data_preview.round(0).head(5),
+            use_container_width=True,
+            column_config={
+                "Livret A (3%)": st.column_config.NumberColumn("💰 Livret A", format="%.0f €"),
+                "Stratégie Premium (8.5%)": st.column_config.NumberColumn("🚀 Stratégie Premium", format="%.0f €"),
+                "Pouvoir d'achat réel": st.column_config.NumberColumn("📉 Inflation", format="%.0f €")
+            }
+        )
         
-        st.markdown('</div>', unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
+        st.markdown("""
+        <div style="background: #fff3cd; padding: 12px 16px; border-radius: 8px; margin-top: 8px; border-left: 4px solid #ffc107;">
+            <strong>💡 Le saviez-vous ?</strong>
+            <span style="color: #6c757d; font-size: 14px;">En 10 ans, l'inflation peut réduire de 20% le pouvoir d'achat de votre épargne. La version Premium vous montre comment y faire face.</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # fin blur-preview-content
+        
+        # Overlay CTA au-dessus du blur
+        st.markdown("""
+        <div class="blur-overlay-cta">
+            <span class="lock-icon">🔒</span>
+            <h3>Contenu Premium</h3>
+            <p>Abonnez-vous pour débloquer<br>l'intégralité des analyses</p>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <span style="background: #667eea; color: white; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600;">9€/mois</span>
+                <span style="background: #28a745; color: white; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600;">⭐ 5/5</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # fin blur-preview-container
+    
+    st.divider()
+    
+    # Bannière de confiance en bas
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; text-align: center;">
+        <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; align-items: center;">
+            <span style="font-weight: 600; color
