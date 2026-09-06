@@ -35,13 +35,12 @@ st.markdown("""
 <style>
     /* SUPPRESSION TOTALE DES ESPACES */
     .main .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.5rem !important;
         padding-bottom: 0rem !important;
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
     
-    /* Supprimer les marges des colonnes */
     .row-widget.stColumns {
         gap: 0px !important;
         margin: 0px !important;
@@ -52,19 +51,14 @@ st.markdown("""
         margin: 0px !important;
     }
     
-    /* Supprimer les espaces des éléments Streamlit */
     .stMarkdown {
         margin: 0px !important;
         padding: 0px !important;
     }
     
     .stDivider {
-        margin: 6px 0px !important;
+        margin: 4px 0px !important;
         padding: 0px !important;
-    }
-    
-    .stSpacer {
-        display: none !important;
     }
     
     .element-container {
@@ -74,10 +68,9 @@ st.markdown("""
     
     .stAlert {
         margin: 4px 0px !important;
-        padding: 8px !important;
+        padding: 6px !important;
     }
     
-    /* Supprimer les marges des vides */
     .stVerticalBlock {
         gap: 0px !important;
     }
@@ -86,10 +79,10 @@ st.markdown("""
     .premium-badge {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 4px 14px;
+        padding: 3px 12px;
         border-radius: 50px;
         font-weight: 700;
-        font-size: 12px;
+        font-size: 11px;
         display: inline-block;
         letter-spacing: 0.5px;
         text-transform: uppercase;
@@ -99,17 +92,17 @@ st.markdown("""
     .free-badge {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         color: white;
-        padding: 3px 12px;
+        padding: 2px 10px;
         border-radius: 50px;
         font-weight: 600;
-        font-size: 11px;
+        font-size: 10px;
         display: inline-block;
     }
     
     .paywall-premium {
         background: linear-gradient(145deg, #ffffff, #f8f9fe);
-        border-radius: 16px;
-        padding: 18px 18px 14px 18px;
+        border-radius: 14px;
+        padding: 14px 14px 10px 14px;
         box-shadow: 0 20px 60px rgba(102, 126, 234, 0.12);
         border: 1px solid rgba(102, 126, 234, 0.08);
         text-align: center;
@@ -121,47 +114,47 @@ st.markdown("""
     
     .pricing-card-premium {
         background: linear-gradient(145deg, #667eea, #764ba2);
-        border-radius: 14px;
-        padding: 14px 18px;
+        border-radius: 12px;
+        padding: 12px 14px;
         color: white;
-        margin: 8px 0 10px 0;
+        margin: 6px 0 8px 0;
         box-shadow: 0 10px 40px rgba(102, 126, 234, 0.35);
         position: relative;
     }
     
     .pricing-price-premium {
-        font-size: 34px;
+        font-size: 30px;
         font-weight: 800;
         margin: 2px 0;
     }
     
     .pricing-price-premium span {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 400;
         opacity: 0.8;
     }
     
     .pricing-features-premium {
         text-align: left;
-        margin: 8px 0 2px 0;
+        margin: 6px 0 2px 0;
         padding: 0;
         list-style: none;
     }
     
     .pricing-features-premium li {
-        padding: 3px 0;
+        padding: 2px 0;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         color: rgba(255,255,255,0.95);
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .pricing-features-premium li::before {
         content: "✦";
         color: #ffd700;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 12px;
     }
     
     .preview-container {
@@ -170,13 +163,13 @@ st.markdown("""
         background: #f8f9fe;
         border: 2px solid #e0e4f0;
         position: relative;
-        min-height: 380px;
+        min-height: 350px;
         height: 100%;
         margin: 0px;
     }
     
     .preview-content {
-        padding: 10px 14px 14px 14px;
+        padding: 8px 12px 10px 12px;
         background: white;
         border-radius: 12px;
     }
@@ -187,112 +180,118 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.85) 55%, rgba(255,255,255,0.95) 100%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.95) 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 10;
         border-radius: 14px;
-        padding: 15px;
+        padding: 12px;
     }
     
     .preview-overlay .lock-icon {
-        font-size: 40px;
-        margin-bottom: 4px;
+        font-size: 36px;
+        margin-bottom: 2px;
     }
     
     .preview-overlay h3 {
         margin: 0 0 2px 0;
         color: #1a1a2e;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
     }
     
     .preview-overlay p {
-        margin: 0 0 8px 0;
+        margin: 0 0 6px 0;
         color: #6c757d;
-        font-size: 13px;
+        font-size: 12px;
         text-align: center;
     }
     
     .preview-overlay .price-tag {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
     }
     
     .preview-overlay .price-tag span {
-        padding: 4px 14px;
+        padding: 3px 12px;
         border-radius: 50px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
     }
     
     .testimonial-card {
         background: white;
-        padding: 10px 12px;
-        border-radius: 10px;
-        margin-bottom: 6px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        margin-bottom: 4px;
         border-left: 3px solid #667eea;
         box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     }
     
     .testimonial-card .stars {
         color: #ffd700;
-        font-size: 12px;
-        letter-spacing: 2px;
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+    
+    .testimonial-card p {
+        font-size: 11px !important;
+        margin: 2px 0 !important;
+        font-style: italic;
     }
     
     .testimonial-card .author {
         font-weight: 600;
         color: #1a1a2e;
-        margin-top: 2px;
+        margin-top: 1px;
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
+        gap: 4px;
+        font-size: 11px;
     }
     
     .testimonial-card .author .role {
         font-weight: 400;
         color: #6c757d;
-        font-size: 11px;
+        font-size: 10px;
     }
     
     .security-badge {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        font-size: 11px;
+        gap: 8px;
+        font-size: 10px;
         color: #6c757d;
-        margin-top: 6px;
+        margin-top: 4px;
         flex-wrap: wrap;
     }
     
     .security-badge span {
         display: flex;
         align-items: center;
-        gap: 3px;
+        gap: 2px;
     }
     
     .metric-preview {
         background: white;
-        padding: 8px 10px;
+        padding: 6px 8px;
         border-radius: 8px;
         border: 1px solid #e9ecef;
         text-align: center;
     }
     
     .metric-preview .value {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 800;
         color: #dc3545;
     }
     
     .metric-preview .label {
-        font-size: 10px;
+        font-size: 9px;
         color: #6c757d;
         font-weight: 500;
     }
@@ -302,14 +301,14 @@ st.markdown("""
     }
     
     .sidebar-status {
-        padding: 10px 14px;
-        border-radius: 10px;
-        margin-bottom: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 14px;
+        gap: 6px;
+        font-size: 13px;
     }
     
     .sidebar-status.free {
@@ -334,13 +333,12 @@ st.markdown("""
         animation: pulse 2s infinite;
     }
     
-    /* Réduire les marges des titres */
     h1, h2, h3, h4, h5, h6 {
-        margin: 4px 0 !important;
+        margin: 2px 0 !important;
     }
     
     p {
-        margin: 2px 0 !important;
+        margin: 1px 0 !important;
     }
     
     .stTextInput > div {
@@ -356,6 +354,11 @@ st.markdown("""
     .st-emotion-cache-1v0mbdj {
         margin: 0px !important;
         padding: 0px !important;
+    }
+    
+    /* Cacher le label du text input */
+    .stTextInput label {
+        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -498,9 +501,11 @@ with col_right:
     if not st.session_state["est_abonne"]:
         st.markdown("""
         <div style="text-align:right;">
-            <span style="background:#fff3cd;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">👀 7 jours essai</span>
+            <span style="background:#fff3cd;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:600;">👀 7 jours essai</span>
         </div>
         """, unsafe_allow_html=True)
+
+st.divider()
 
 # ============================================
 # ESPACE MEMBRE VS PAYWALL
@@ -549,39 +554,39 @@ if st.session_state["est_abonne"]:
 
 else:
     # ==========================================
-    # PAYWALL SANS ESPACES VIDES
+    # PAYWALL - VERSION SIMPLIFIEE
     # ==========================================
     
-    # Bannière - COMPACTE
+    # Banniere
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#f8f9fe,#eef1ff);padding:10px 18px;border-radius:14px;border:1px solid #d0d3e0;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+    <div style="background:linear-gradient(135deg,#f8f9fe,#eef1ff);padding:8px 16px;border-radius:12px;border:1px solid #d0d3e0;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
             <div>
                 <span class="free-badge">🔓 APERCU</span>
-                <h3 style="margin:2px 0;font-size:16px;">Decouvrez Premium</h3>
-                <p style="margin:0;font-size:12px;color:#6c757d;">Testez et voyez la valeur</p>
+                <h3 style="margin:1px 0;font-size:15px;">Decouvrez Premium</h3>
+                <p style="margin:0;font-size:11px;color:#6c757d;">Testez et voyez la valeur</p>
             </div>
-            <div style="display:flex;gap:6px;">
-                <span style="background:#ffd700;padding:2px 10px;border-radius:20px;font-weight:600;font-size:11px;">⭐ 5</span>
-                <span style="background:#28a745;color:#fff;padding:2px 10px;border-radius:20px;font-weight:600;font-size:11px;">✅ Satisfait</span>
+            <div style="display:flex;gap:4px;">
+                <span style="background:#ffd700;padding:2px 8px;border-radius:20px;font-weight:600;font-size:10px;">⭐ 5</span>
+                <span style="background:#28a745;color:#fff;padding:2px 8px;border-radius:20px;font-weight:600;font-size:10px;">✅ Satisfait</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Colonnes SANS ESPACE
     col_pay, col_prev = st.columns([1, 1.3], gap="small")
     
     with col_pay:
+        # Carte de prix
         st.markdown("""
         <div class="paywall-premium">
-            <h2 style="font-size:22px;margin:0;">🔒 Premium</h2>
-            <p style="font-size:13px;margin:2px 0 8px 0;">Debloquez la puissance totale</p>
+            <h2 style="font-size:20px;margin:0;">🔒 Premium</h2>
+            <p style="font-size:12px;margin:1px 0 6px 0;">Debloquez la puissance totale</p>
             
             <div class="pricing-card-premium">
-                <div style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:20px;display:inline-block;">⭐ OFFRE POPULAIRE</div>
+                <div style="font-size:10px;background:rgba(255,255,255,0.2);padding:1px 10px;border-radius:20px;display:inline-block;">⭐ OFFRE POPULAIRE</div>
                 <div class="pricing-price-premium">9,00€ <span>/ mois</span></div>
-                <div style="font-size:12px;opacity:0.8;margin:-2px 0 6px 0;">0,30€/jour</div>
+                <div style="font-size:11px;opacity:0.8;margin:-2px 0 4px 0;">0,30€/jour</div>
                 <ul class="pricing-features-premium">
                     <li>Simulations illimitees</li>
                     <li>Comparaison multi-scenarios</li>
@@ -592,30 +597,27 @@ else:
                 </ul>
             </div>
             
-            <div style="margin-top:8px;">
-                <div style="background:white;border-radius:12px;padding:12px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
-                    <label style="font-weight:600;font-size:12px;display:block;text-align:left;margin-bottom:4px;">📧 Email :</label>
-                    <input type="email" id="email_input_paywall" placeholder="vous@exemple.com" style="width:100%;padding:8px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px;border:none;border-radius:50px;font-weight:700;font-size:14px;cursor:pointer;width:100%;box-shadow:0 4px 20px rgba(102,126,234,0.35);" class="btn-pulse">
-                        🔓 DEBLOQUER
-                    </button>
-                </div>
+            <div style="background:white;border-radius:10px;padding:10px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.04);margin-top:6px;">
+                <label style="font-weight:600;font-size:11px;display:block;text-align:left;margin-bottom:3px;">📧 Email :</label>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
+        # Email input (Streamlit natif - plus propre)
         email_input = st.text_input("", placeholder="vous@exemple.com", key="email_paywall", label_visibility="collapsed")
         if email_input:
             st.session_state["email"] = email_input
         
+        # Bouton d'abonnement
         if st.button("🔓 DEBLOQUER", use_container_width=True, key="stButton_subscribe"):
             if not valider_email(st.session_state.get("email", "")):
-                st.error("Email invalide")
+                st.error("❌ Email invalide")
             else:
                 checkout_url = creer_session_paiement()
                 if checkout_url:
-                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display:block;text-align:center;background:#28a745;color:#fff;padding:8px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:6px;font-size:13px;">💳 Stripe</a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display:block;text-align:center;background:#28a745;color:#fff;padding:8px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:4px;font-size:12px;">💳 Payer via Stripe</a>', unsafe_allow_html=True)
         
+        # Badges de securite
         st.markdown("""
         <div class="security-badge">
             <span>🔒 Secure</span>
@@ -625,34 +627,35 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("---")
+        st.divider()
         
-        st.markdown("### 💬 Témoignages")
+        # Temoignages
+        st.markdown("### 💬 Temoignages")
         st.markdown("""
         <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-size:12px;margin:2px 0;">"9€ rentabilises au centuple !"</p>
+            <p>"9€ rentabilises au centuple !"</p>
             <div class="author">Thomas R. <span class="role">Entrepreneur</span></div>
         </div>
         <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-size:12px;margin:2px 0;">"Graphiques ultra clairs"</p>
+            <p>"Graphiques ultra clairs"</p>
             <div class="author">Sarah M. <span class="role">Cadre</span></div>
         </div>
         <div class="testimonial-card" style="margin-bottom:0;">
             <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p style="font-size:12px;margin:2px 0;">"Enfin la verite sur l'epargne !"</p>
+            <p>"Enfin la verite sur l'epargne !"</p>
             <div class="author">David L. <span class="role">Ingenieur</span></div>
         </div>
         """, unsafe_allow_html=True)
     
     with col_prev:
         st.markdown("""
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <h3 style="margin:0;font-size:18px;">🔍 Apercu</h3>
-            <span style="background:#ff4757;color:#fff;padding:1px 8px;border-radius:20px;font-size:9px;font-weight:700;">DEMO</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <h3 style="margin:0;font-size:17px;">🔍 Apercu</h3>
+            <span style="background:#ff4757;color:#fff;padding:1px 8px;border-radius:20px;font-size:8px;font-weight:700;">DEMO</span>
         </div>
-        <p style="font-size:12px;color:#6c757d;margin:0 0 8px 0;">👆 Apercu de l'analyse</p>
+        <p style="font-size:11px;color:#6c757d;margin:0 0 6px 0;">👆 Apercu de l'analyse</p>
         """, unsafe_allow_html=True)
         
         st.markdown('<div class="preview-container">', unsafe_allow_html=True)
@@ -692,8 +695,8 @@ else:
         )
         
         st.markdown("""
-        <div style="background:#fff3cd;padding:6px 12px;border-radius:6px;margin-top:4px;border-left:3px solid #ffc107;">
-            <span style="font-size:11px;"><strong>💡</strong> Inflation reduit de 20% en 10 ans</span>
+        <div style="background:#fff3cd;padding:4px 10px;border-radius:6px;margin-top:4px;border-left:3px solid #ffc107;">
+            <span style="font-size:10px;"><strong>💡</strong> Inflation reduit de 20% en 10 ans</span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -716,12 +719,12 @@ else:
     st.divider()
     
     st.markdown("""
-    <div style="background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:10px;border-radius:10px;text-align:center;">
-        <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
-            <span style="font-weight:600;font-size:12px;">🔒 100% securise</span>
-            <span style="font-weight:600;font-size:12px;">🔄 Annulation</span>
-            <span style="font-weight:600;font-size:12px;">💳 Stripe</span>
-            <span style="font-weight:600;font-size:12px;">📱 7j/7</span>
+    <div style="background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:8px;border-radius:10px;text-align:center;">
+        <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+            <span style="font-weight:600;font-size:11px;">🔒 100% securise</span>
+            <span style="font-weight:600;font-size:11px;">🔄 Annulation</span>
+            <span style="font-weight:600;font-size:11px;">💳 Stripe</span>
+            <span style="font-weight:600;font-size:11px;">📱 7j/7</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
