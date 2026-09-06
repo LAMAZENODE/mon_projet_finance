@@ -43,10 +43,8 @@ def simuler_epargne(initial, mensuel, taux, inflation, annees):
     for mois in range(1, (annees * 12) + 1):
         capital_nominal += mensuel
         capital_nominal += capital_nominal * taux_mensuel_nominal
-        
         capital_reel += mensuel
         capital_reel += capital_reel * taux_mensuel_reel
-        
         if mois % 12 == 0:
             annee = mois // 12
             historique.append({
@@ -56,44 +54,7 @@ def simuler_epargne(initial, mensuel, taux, inflation, annees):
             })
     return pd.DataFrame(historique)
 
-def generer_pdf_apercu():
-    """Génère un PDF d'aperçu visible mais avec filigrane"""
-    buffer = BytesIO()
-    
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
-    
-    annees = list(range(1, 16))
-    livret_a = [10000 * (1.03**i) for i in range(1, 16)]
-    dynamique = [10000 * (1.06**i) for i in range(1, 16)]
-    inflation = [10000 * (0.975**i) for i in range(1, 16)]
-    
-    # GRAND TITRE 1
-    ax1.plot(annees, livret_a, label="Livret A (3%)", color="#4b7bec", linewidth=2.5)
-    ax1.plot(annees, dynamique, label="Stratégie Premium (6%)", color="#00d4b2", linewidth=2.5)
-    ax1.plot(annees, inflation, label="Pouvoir d'achat réel", color="#ff4757", linewidth=2, linestyle='--')
-    ax1.set_title("📊 COMPARAISON DES STRATÉGIES D'ÉPARGNE", fontsize=16, fontweight='bold', pad=15)
-    ax1.set_xlabel("Années", fontsize=12)
-    ax1.set_ylabel("Valeur (€)", fontsize=12)
-    ax1.grid(True, linestyle="--", alpha=0.3)
-    ax1.legend(loc='upper left', fontsize=11)
-    
-    # GRAND TITRE 2
-    ax2.plot(annees, livret_a, label="Valeur Nominale", color="#4b7bec", linewidth=2)
-    ax2.plot(annees, inflation, label="Pouvoir d'Achat Réel", color="#ff4757", linewidth=2.5)
-    ax2.fill_between(annees, inflation, livret_a, alpha=0.2, color='#ff4757')
-    ax2.set_title("💰 L'INFLATION : L'ENNEMI SILENCIEUX DE VOTRE ÉPARGNE", fontsize=16, fontweight='bold', pad=15)
-    ax2.set_xlabel("Années", fontsize=12)
-    ax2.set_ylabel("Valeur (€)", fontsize=12)
-    ax2.grid(True, linestyle="--", alpha=0.3)
-    ax2.legend(loc='upper left', fontsize=11)
-    
-    plt.tight_layout()
-    plt.savefig(buffer, format="pdf", dpi=300, bbox_inches='tight')
-    plt.close()
-    buffer.seek(0)
-    return buffer
-
-def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, annees, email):
+def generer_pdf(initial, mensuel, inflation, taux_a, taux_b, taux_c, annees, email):
     """Génère un PDF complet pour les membres premium"""
     buffer = BytesIO()
     
@@ -107,7 +68,7 @@ def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, ann
     ax1.plot(df_a["Année"], df_a["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_a}%", color="#4b7bec", linewidth=2.5)
     ax1.plot(df_b["Année"], df_b["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_b}%", color="#ffa502", linewidth=2.5)
     ax1.plot(df_c["Année"], df_c["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_c}%", color="#00d4b2", linewidth=2.5)
-    ax1.set_title(f"📈 ÉVOLUTION DU POUVOIR D'ACHAT - {email}", fontsize=16, fontweight='bold')
+    ax1.set_title(f"📈 ÉVOLUTION DU POUVOIR D'ACHAT", fontsize=16, fontweight='bold')
     ax1.set_xlabel("Années", fontsize=12)
     ax1.set_ylabel("Valeur Réelle (€)", fontsize=12)
     ax1.grid(True, linestyle="--", alpha=0.3)
@@ -123,8 +84,7 @@ def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, ann
     ax2.grid(True, linestyle="--", alpha=0.3)
     ax2.legend(loc='upper left', fontsize=11)
     
-    # Ajout d'un bandeau avec l'email
-    plt.figtext(0.5, 0.01, f"Rapport personnalisé pour : {email} | Généré le {datetime.now().strftime('%d/%m/%Y')}", 
+    plt.figtext(0.5, 0.01, f"Rapport personnalisé pour : {email} | {datetime.now().strftime('%d/%m/%Y')}", 
                 ha="center", fontsize=10, style='italic', color='#6c757d')
     
     plt.tight_layout()
@@ -197,6 +157,32 @@ st.markdown("""
         content: "✅";
     }
     
+    .btn-payer {
+        background: linear-gradient(135deg, #00d4b2, #28a745);
+        color: white;
+        padding: 16px 32px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 20px;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 6px 30px rgba(40, 167, 69, 0.4);
+        transition: all 0.3s;
+        animation: pulse 2s infinite;
+    }
+    
+    .btn-payer:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 40px rgba(40, 167, 69, 0.5);
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
     .testimonial {
         background: white;
         padding: 16px 18px;
@@ -267,24 +253,6 @@ st.markdown("""
         text-align: center;
     }
     
-    .btn-subscribe {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 12px 32px;
-        border: none;
-        border-radius: 50px;
-        font-weight: 700;
-        font-size: 16px;
-        cursor: pointer;
-        width: 100%;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35);
-        transition: transform 0.3s;
-    }
-    
-    .btn-subscribe:hover {
-        transform: translateY(-2px);
-    }
-    
     .security-badge {
         display: flex;
         justify-content: center;
@@ -302,16 +270,26 @@ st.markdown("""
         margin: 12px 0;
     }
     
-    .feature-highlight strong {
-        font-size: 15px;
-    }
-    
     .pdf-lock {
         text-align: center;
-        padding: 12px;
+        padding: 16px;
         background: #f8f9fa;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 2px dashed #dee2e6;
+    }
+    
+    .badge-popular {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: inline-block;
+    }
+    
+    .price-small {
+        font-size: 14px;
+        opacity: 0.8;
+        margin: -4px 0 8px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -345,7 +323,7 @@ if st.session_state["est_abonne"]:
     # ESPACE PREMIUM DÉBLOQUÉ
     # ==========================================
     
-    st.success("🔓 Accès Premium débloqué ! Vous avez accès à toutes les fonctionnalités.")
+    st.success("🔓 Accès Premium débloqué !")
     
     st.markdown("### 📊 Paramètres de simulation")
     col1, col2, col3 = st.columns(3)
@@ -390,7 +368,7 @@ if st.session_state["est_abonne"]:
     st.line_chart(df_compare)
     
     st.markdown("### 📥 Export PDF personnalisé")
-    pdf = generer_pdf_complet(capital, mensuel, inflation, taux_a, taux_b, taux_c, annees, st.session_state.get("email", "Utilisateur"))
+    pdf = generer_pdf(capital, mensuel, inflation, taux_a, taux_b, taux_c, annees, st.session_state.get("email", "Utilisateur"))
     st.download_button(
         "📥 Télécharger mon rapport PDF personnalisé",
         data=pdf,
@@ -401,20 +379,20 @@ if st.session_state["est_abonne"]:
 
 else:
     # ==========================================
-    # VERSION GRATUITE - APERÇU VISIBLE MAIS PDF PAYANT
+    # VERSION GRATUITE - LE CLIENT VOIT LE BOUTON PAYER
     # ==========================================
     
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 16px 24px; border-radius: 12px; border: 1px solid #d0d3e0; margin-bottom: 20px;">
+    <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 12px 20px; border-radius: 12px; border: 1px solid #d0d3e0; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
             <div>
-                <span style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 2px 12px; border-radius: 50px; font-weight: 600; font-size: 11px;">👀 APERÇU GRATUIT</span>
-                <h3 style="margin: 6px 0 2px 0;">Visualisez l'impact de l'inflation</h3>
-                <p style="margin: 0; color: #6c757d; font-size: 14px;">Découvrez les graphiques et titres explicatifs</p>
+                <span style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 2px 12px; border-radius: 50px; font-weight: 600; font-size: 11px;">👀 APERÇU</span>
+                <h3 style="margin: 4px 0 2px 0; font-size: 18px;">Visualisez l'impact de l'inflation</h3>
+                <p style="margin: 0; color: #6c757d; font-size: 13px;">Découvrez les graphiques et titres explicatifs</p>
             </div>
             <div style="display: flex; gap: 8px;">
-                <span style="background: #ffd700; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">⭐ 5/5</span>
-                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">✅ Satisfait</span>
+                <span style="background: #ffd700; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 11px;">⭐ 5/5</span>
+                <span style="background: #28a745; color: white; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 11px;">✅ Satisfait</span>
             </div>
         </div>
     </div>
@@ -428,33 +406,31 @@ else:
         
         st.markdown("""
         <div class="pricing-card">
+            <div style="display: flex; justify-content: center; margin-bottom: 4px;">
+                <span class="badge-popular">⭐ OFFRE POPULAIRE</span>
+            </div>
             <h3 style="margin: 0;">Abonnement Mensuel</h3>
             <div class="pricing-price">9.00€ <span>/ mois</span></div>
+            <div class="price-small">soit seulement 0,30€ par jour</div>
             <ul class="features">
                 <li>Simulations illimitées</li>
-                <li>Graphes comparatifs avancés</li>
+                <li>Graphiques comparatifs avancés</li>
                 <li>Exports PDF haute résolution</li>
+                <li>Analyse personnalisée</li>
+                <li>Annulation en 1 clic</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="feature-highlight">
-            <strong>📄 Pourquoi payer ?</strong><br>
-            <span style="font-size: 14px; color: #6c757d;">
-                Vous voyez l'aperçu avec les <strong>grands titres</strong>.<br>
-                Pour obtenir votre <strong>rapport personnalisé</strong> avec vos données, abonnez-vous.
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
+        # Formulaire email
         email = st.text_input("📧 Saisissez votre adresse email pour commencer :", 
                              placeholder="vous@exemple.com", 
                              key="email_input")
         if email:
             st.session_state["email"] = email
         
-        if st.button("🔓 DÉBLOQUER MAINTENANT", use_container_width=True, type="primary"):
+        # 🔴 BOUTON PAYER TRÈS VISIBLE !
+        if st.button("💳 PAYER 9,00€ ET DÉBLOQUER", use_container_width=True, type="primary"):
             if not valider_email(email):
                 st.error("⚠️ Veuillez entrer une adresse email valide.")
             else:
@@ -462,9 +438,9 @@ else:
         
         st.markdown("""
         <div class="security-badge">
-            <span>🔒 Paiement 100% sécurisé</span>
-            <span>🔄 Annulation en 1 clic</span>
-            <span>💳 Stripe Certified</span>
+            <span>🔒 100% sécurisé</span>
+            <span>🔄 Annulation facile</span>
+            <span>💳 Stripe</span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -484,33 +460,38 @@ else:
     
     with col_right:
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <h3 style="margin: 0;">🔍 Aperçu du rapport</h3>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 18px;">🔍 Aperçu du rapport Premium</h3>
             <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">DÉMO</span>
         </div>
+        <p style="font-size: 13px; color: #6c757d; margin: 0 0 10px 0;">👆 Visualisez les grands titres et graphiques</p>
         """, unsafe_allow_html=True)
-        st.caption("👆 Visualisez les grands titres et graphiques")
         
-        # Conteneur d'aperçu du graphique
+        # Conteneur d'aperçu
         st.markdown('<div class="preview-box">', unsafe_allow_html=True)
         
         st.caption("💡 Exemple d'analyse générée pour un capital de 10 000 €")
         
         data_preview = pd.DataFrame({
-            "Livret A (3%)": [10000 * (1.03**i) for i in range(1, 16)],
-            "Stratégie Premium (6%)": [10000 * (1.06**i) for i in range(1, 16)],
-            "Pouvoir d'achat réel": [10000 * (0.975**i) for i in range(1, 16)]
+            "📊 Livret A (3%)": [10000 * (1.03**i) for i in range(1, 16)],
+            "🚀 Stratégie Premium (6%)": [10000 * (1.06**i) for i in range(1, 16)],
+            "📉 Pouvoir d'achat réel": [10000 * (0.975**i) for i in range(1, 16)]
         }, index=range(1, 16))
         
         st.line_chart(data_preview)
         
-        # Overlay avec CTA - PAS DE BOUTON GRATUIT
+        # Overlay avec message incitatif
         st.markdown("""
         <div class="preview-overlay">
             <span class="lock">📄</span>
-            <h3>PDF avec GRANDS TITRES</h3>
-            <p>Abonnez-vous pour débloquer<br>votre rapport personnalisé</p>
-            <div style="display: flex; gap: 10px; margin-top: 6px;">
+            <h3>Rapport complet verrouillé</h3>
+            <p>Abonnez-vous pour débloquer :</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 4px 0 10px 0;">
+                <span style="background: #e9ecef; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📊 Graphiques interactifs</span>
+                <span style="background: #e9ecef; padding: 4px 12px; border-radius: 20px; font-size: 12px;">📥 Export PDF</span>
+                <span style="background: #e9ecef; padding: 4px 12px; border-radius: 20px; font-size: 12px;">🎯 Analyse personnalisée</span>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 4px;">
                 <span style="background: #667eea; color: white; padding: 4px 16px; border-radius: 50px; font-weight: 700; font-size: 13px;">9€/mois</span>
                 <span style="background: #ffd700; padding: 4px 16px; border-radius: 50px; font-weight: 700; font-size: 13px;">⭐ 5/5</span>
             </div>
@@ -519,21 +500,22 @@ else:
         
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # PAS DE BOUTON DE TÉLÉCHARGEMENT GRATUIT !
+        # 🔒 Bloc PDF verrouillé - PAS DE TÉLÉCHARGEMENT GRATUIT !
         st.markdown("""
-        <div class="pdf-lock">
-            <span style="font-size: 24px;">🔒</span>
-            <p style="margin: 4px 0 0 0; font-weight: 600; color: #6c757d;">
-                Le PDF est disponible uniquement en version Premium
+        <div class="pdf-lock" style="margin-top: 12px;">
+            <span style="font-size: 28px;">🔒</span>
+            <p style="margin: 4px 0 0 0; font-weight: 700; color: #6c757d; font-size: 15px;">
+                PDF disponible uniquement en version Premium
             </p>
-            <p style="margin: 0; font-size: 13px; color: #adb5bd;">
-                Abonnez-vous pour télécharger votre rapport personnalisé
+            <p style="margin: 2px 0 0 0; font-size: 13px; color: #adb5bd;">
+                Payer 9€ pour débloquer votre rapport personnalisé
             </p>
         </div>
         """, unsafe_allow_html=True)
         
+        # Liste des fonctionnalités
         st.markdown("""
-        <div style="background: white; padding: 14px 16px; border-radius: 10px; border: 1px solid #e9ecef; margin-top: 12px;">
+        <div style="background: white; padding: 12px 16px; border-radius: 10px; border: 1px solid #e9ecef; margin-top: 12px;">
             <strong>📋 Ce que vous obtiendrez en Premium :</strong>
             <ul style="margin: 6px 0 0 0; padding-left: 20px; font-size: 13px; color: #6c757d;">
                 <li>📊 <strong>Grands titres</strong> explicatifs sur chaque graphique</li>
