@@ -33,7 +33,6 @@ def valider_email(email):
     return re.match(pattern, email) is not None
 
 def simuler_epargne(initial, mensuel, taux, inflation, annees):
-    """Simule l'évolution d'une épargne avec inflation"""
     capital_nominal = initial
     capital_reel = initial
     taux_mensuel_nominal = (taux / 100) / 12
@@ -58,36 +57,30 @@ def simuler_epargne(initial, mensuel, taux, inflation, annees):
     return pd.DataFrame(historique)
 
 def generer_pdf_apercu():
-    """Génère un PDF d'aperçu avec de GRANDS TITRES"""
+    """Génère un PDF d'aperçu visible mais avec filigrane"""
     buffer = BytesIO()
     
-    # Créer la figure avec 2 graphiques
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
     
-    # Données d'exemple
     annees = list(range(1, 16))
     livret_a = [10000 * (1.03**i) for i in range(1, 16)]
     dynamique = [10000 * (1.06**i) for i in range(1, 16)]
     inflation = [10000 * (0.975**i) for i in range(1, 16)]
     
-    # GRAPH 1 - Comparaison des scénarios
+    # GRAND TITRE 1
     ax1.plot(annees, livret_a, label="Livret A (3%)", color="#4b7bec", linewidth=2.5)
     ax1.plot(annees, dynamique, label="Stratégie Premium (6%)", color="#00d4b2", linewidth=2.5)
     ax1.plot(annees, inflation, label="Pouvoir d'achat réel", color="#ff4757", linewidth=2, linestyle='--')
-    
-    # GRAND TITRE 1
     ax1.set_title("📊 COMPARAISON DES STRATÉGIES D'ÉPARGNE", fontsize=16, fontweight='bold', pad=15)
     ax1.set_xlabel("Années", fontsize=12)
     ax1.set_ylabel("Valeur (€)", fontsize=12)
     ax1.grid(True, linestyle="--", alpha=0.3)
     ax1.legend(loc='upper left', fontsize=11)
     
-    # GRAPH 2 - Impact de l'inflation
+    # GRAND TITRE 2
     ax2.plot(annees, livret_a, label="Valeur Nominale", color="#4b7bec", linewidth=2)
     ax2.plot(annees, inflation, label="Pouvoir d'Achat Réel", color="#ff4757", linewidth=2.5)
     ax2.fill_between(annees, inflation, livret_a, alpha=0.2, color='#ff4757')
-    
-    # GRAND TITRE 2
     ax2.set_title("💰 L'INFLATION : L'ENNEMI SILENCIEUX DE VOTRE ÉPARGNE", fontsize=16, fontweight='bold', pad=15)
     ax2.set_xlabel("Années", fontsize=12)
     ax2.set_ylabel("Valeur (€)", fontsize=12)
@@ -100,13 +93,12 @@ def generer_pdf_apercu():
     buffer.seek(0)
     return buffer
 
-def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, annees):
+def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, annees, email):
     """Génère un PDF complet pour les membres premium"""
     buffer = BytesIO()
     
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
     
-    # Simuler les 3 scénarios
     df_a = simuler_epargne(initial, mensuel, taux_a, inflation, annees)
     df_b = simuler_epargne(initial, mensuel, taux_b, inflation, annees)
     df_c = simuler_epargne(initial, mensuel, taux_c, inflation, annees)
@@ -115,7 +107,7 @@ def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, ann
     ax1.plot(df_a["Année"], df_a["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_a}%", color="#4b7bec", linewidth=2.5)
     ax1.plot(df_b["Année"], df_b["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_b}%", color="#ffa502", linewidth=2.5)
     ax1.plot(df_c["Année"], df_c["Pouvoir d'Achat Réel (€)"], label=f"Scénario {taux_c}%", color="#00d4b2", linewidth=2.5)
-    ax1.set_title("📈 ÉVOLUTION DU POUVOIR D'ACHAT", fontsize=16, fontweight='bold')
+    ax1.set_title(f"📈 ÉVOLUTION DU POUVOIR D'ACHAT - {email}", fontsize=16, fontweight='bold')
     ax1.set_xlabel("Années", fontsize=12)
     ax1.set_ylabel("Valeur Réelle (€)", fontsize=12)
     ax1.grid(True, linestyle="--", alpha=0.3)
@@ -131,6 +123,10 @@ def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, ann
     ax2.grid(True, linestyle="--", alpha=0.3)
     ax2.legend(loc='upper left', fontsize=11)
     
+    # Ajout d'un bandeau avec l'email
+    plt.figtext(0.5, 0.01, f"Rapport personnalisé pour : {email} | Généré le {datetime.now().strftime('%d/%m/%Y')}", 
+                ha="center", fontsize=10, style='italic', color='#6c757d')
+    
     plt.tight_layout()
     plt.savefig(buffer, format="pdf", dpi=300, bbox_inches='tight')
     plt.close()
@@ -138,7 +134,7 @@ def generer_pdf_complet(initial, mensuel, inflation, taux_a, taux_b, taux_c, ann
     return buffer
 
 def creer_paiement():
-    # Simuler paiement - À remplacer par Stripe
+    # Simulation paiement - À remplacer par Stripe
     st.session_state["est_abonne"] = True
     st.success("🎉 Félicitations ! Votre abonnement Premium est activé.")
     st.balloons()
@@ -229,7 +225,7 @@ st.markdown("""
     }
     
     .preview-box {
-        border: 2px dashed #d0d3e0;
+        border: 2px solid #d0d3e0;
         border-radius: 12px;
         padding: 20px;
         background: #f8f9fe;
@@ -309,6 +305,14 @@ st.markdown("""
     .feature-highlight strong {
         font-size: 15px;
     }
+    
+    .pdf-lock {
+        text-align: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -355,53 +359,40 @@ if st.session_state["est_abonne"]:
     annees = st.slider("⏳ Horizon d'investissement (années)", 2, 40, 15)
     
     st.markdown("### 📈 Scénarios d'investissement")
-    st.caption("Comparez jusqu'à 3 stratégies différentes")
-    
     c1, c2, c3 = st.columns(3)
     with c1:
-        taux_a = st.number_input("📊 Scénario Standard (%)", value=3.0, step=0.1, help="Livret A, fonds euros...")
+        taux_a = st.number_input("📊 Standard (%)", value=3.0, step=0.1)
     with c2:
-        taux_b = st.number_input("📈 Scénario Dynamique (%)", value=6.0, step=0.1, help="Assurance-vie, SCPI...")
+        taux_b = st.number_input("📈 Dynamique (%)", value=6.0, step=0.1)
     with c3:
-        taux_c = st.number_input("🚀 Scénario Premium (%)", value=8.5, step=0.1, help="Actions, ETF...")
+        taux_c = st.number_input("🚀 Premium (%)", value=8.5, step=0.1)
     
-    # Calculs
     with st.spinner("Calcul en cours..."):
         df_a = simuler_epargne(capital, mensuel, taux_a, inflation, annees)
         df_b = simuler_epargne(capital, mensuel, taux_b, inflation, annees)
         df_c = simuler_epargne(capital, mensuel, taux_c, inflation, annees)
     
-    # Métriques
     st.markdown("### 🎯 Synthèse comparative")
-    
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1:
-        st.metric("📊 Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", 
-                 f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1] - capital:+,.0f} €")
+        st.metric("📊 Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €")
     with col_m2:
-        st.metric("📈 Dynamique", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €",
-                 f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1] - capital:+,.0f} €")
+        st.metric("📈 Dynamique", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €")
     with col_m3:
-        st.metric("🚀 Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €",
-                 f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1] - capital:+,.0f} €")
+        st.metric("🚀 Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €")
     
-    # Graphique
     st.markdown("### 📈 Évolution du pouvoir d'achat")
     df_compare = pd.DataFrame({
-        f"Scénario {taux_a}%": df_a["Pouvoir d'Achat Réel (€)"],
-        f"Scénario {taux_b}%": df_b["Pouvoir d'Achat Réel (€)"],
-        f"Scénario {taux_c}%": df_c["Pouvoir d'Achat Réel (€)"]
+        f"Standard {taux_a}%": df_a["Pouvoir d'Achat Réel (€)"],
+        f"Dynamique {taux_b}%": df_b["Pouvoir d'Achat Réel (€)"],
+        f"Premium {taux_c}%": df_c["Pouvoir d'Achat Réel (€)"]
     }, index=df_a["Année"])
-    
     st.line_chart(df_compare)
     
-    # Export PDF
-    st.markdown("### 📥 Export PDF")
-    st.caption("Téléchargez votre rapport complet en haute résolution")
-    
-    pdf = generer_pdf_complet(capital, mensuel, inflation, taux_a, taux_b, taux_c, annees)
+    st.markdown("### 📥 Export PDF personnalisé")
+    pdf = generer_pdf_complet(capital, mensuel, inflation, taux_a, taux_b, taux_c, annees, st.session_state.get("email", "Utilisateur"))
     st.download_button(
-        "📥 Télécharger le rapport PDF (Haute Résolution)",
+        "📥 Télécharger mon rapport PDF personnalisé",
         data=pdf,
         file_name=f"rapport_epargne_{datetime.now().strftime('%Y%m%d')}.pdf",
         mime="application/pdf",
@@ -410,17 +401,16 @@ if st.session_state["est_abonne"]:
 
 else:
     # ==========================================
-    # VERSION GRATUITE AVEC APERÇU CONCRET
+    # VERSION GRATUITE - APERÇU VISIBLE MAIS PDF PAYANT
     # ==========================================
     
-    # Bannière d'aperçu
     st.markdown("""
     <div style="background: linear-gradient(135deg, #f8f9fe, #eef1ff); padding: 16px 24px; border-radius: 12px; border: 1px solid #d0d3e0; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
             <div>
-                <span style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 2px 12px; border-radius: 50px; font-weight: 600; font-size: 11px;">🔓 APERÇU GRATUIT</span>
-                <h3 style="margin: 6px 0 2px 0;">Découvrez votre rapport personnalisé</h3>
-                <p style="margin: 0; color: #6c757d; font-size: 14px;">Téléchargez un exemple de PDF avec de grands titres explicatifs</p>
+                <span style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 2px 12px; border-radius: 50px; font-weight: 600; font-size: 11px;">👀 APERÇU GRATUIT</span>
+                <h3 style="margin: 6px 0 2px 0;">Visualisez l'impact de l'inflation</h3>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">Découvrez les graphiques et titres explicatifs</p>
             </div>
             <div style="display: flex; gap: 8px;">
                 <span style="background: #ffd700; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">⭐ 5/5</span>
@@ -430,14 +420,12 @@ else:
     </div>
     """, unsafe_allow_html=True)
     
-    # Colonnes : Offre à gauche, Aperçu à droite
     col_left, col_right = st.columns([1, 1.2], gap="medium")
     
     with col_left:
         st.markdown("### 🔒 Accès Premium")
         st.caption("Débloquez la puissance totale de notre simulateur financier.")
         
-        # Carte de prix
         st.markdown("""
         <div class="pricing-card">
             <h3 style="margin: 0;">Abonnement Mensuel</h3>
@@ -450,18 +438,16 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        # Feature highlight
         st.markdown("""
         <div class="feature-highlight">
-            <strong>💡 Pourquoi payer ?</strong><br>
+            <strong>📄 Pourquoi payer ?</strong><br>
             <span style="font-size: 14px; color: #6c757d;">
-                Le PDF vous montre en GRAND TITRE l'impact réel de l'inflation sur votre épargne.
-                Vous voyez immédiatement ce que vous perdez en restant sur un livret A.
+                Vous voyez l'aperçu avec les <strong>grands titres</strong>.<br>
+                Pour obtenir votre <strong>rapport personnalisé</strong> avec vos données, abonnez-vous.
             </span>
         </div>
         """, unsafe_allow_html=True)
         
-        # Email + Bouton
         email = st.text_input("📧 Saisissez votre adresse email pour commencer :", 
                              placeholder="vous@exemple.com", 
                              key="email_input")
@@ -484,7 +470,6 @@ else:
         
         st.divider()
         
-        # Témoignages
         st.markdown("### 💬 Ce qu'en disent nos utilisateurs")
         st.markdown("""
         <div class="testimonial">
@@ -498,20 +483,13 @@ else:
         """, unsafe_allow_html=True)
     
     with col_right:
-        st.markdown("### 🔍 Aperçu de votre rapport Premium")
-        st.caption("👆 Téléchargez l'exemple pour voir la qualité du PDF")
-        
-        # Bouton de téléchargement du PDF d'aperçu
-        pdf_apercu = generer_pdf_apercu()
-        st.download_button(
-            "📥 Télécharger l'aperçu PDF (Exemple gratuit)",
-            data=pdf_apercu,
-            file_name="apercu_rapport_epargne.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-        
-        st.markdown("---")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <h3 style="margin: 0;">🔍 Aperçu du rapport</h3>
+            <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;">DÉMO</span>
+        </div>
+        """, unsafe_allow_html=True)
+        st.caption("👆 Visualisez les grands titres et graphiques")
         
         # Conteneur d'aperçu du graphique
         st.markdown('<div class="preview-box">', unsafe_allow_html=True)
@@ -526,12 +504,12 @@ else:
         
         st.line_chart(data_preview)
         
-        # Overlay avec CTA
+        # Overlay avec CTA - PAS DE BOUTON GRATUIT
         st.markdown("""
         <div class="preview-overlay">
             <span class="lock">📄</span>
             <h3>PDF avec GRANDS TITRES</h3>
-            <p>Téléchargez l'aperçu pour voir<br>la qualité du rapport complet</p>
+            <p>Abonnez-vous pour débloquer<br>votre rapport personnalisé</p>
             <div style="display: flex; gap: 10px; margin-top: 6px;">
                 <span style="background: #667eea; color: white; padding: 4px 16px; border-radius: 50px; font-weight: 700; font-size: 13px;">9€/mois</span>
                 <span style="background: #ffd700; padding: 4px 16px; border-radius: 50px; font-weight: 700; font-size: 13px;">⭐ 5/5</span>
@@ -541,22 +519,32 @@ else:
         
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # Ce que contient le PDF
+        # PAS DE BOUTON DE TÉLÉCHARGEMENT GRATUIT !
+        st.markdown("""
+        <div class="pdf-lock">
+            <span style="font-size: 24px;">🔒</span>
+            <p style="margin: 4px 0 0 0; font-weight: 600; color: #6c757d;">
+                Le PDF est disponible uniquement en version Premium
+            </p>
+            <p style="margin: 0; font-size: 13px; color: #adb5bd;">
+                Abonnez-vous pour télécharger votre rapport personnalisé
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown("""
         <div style="background: white; padding: 14px 16px; border-radius: 10px; border: 1px solid #e9ecef; margin-top: 12px;">
-            <strong>📋 Ce que contient votre PDF :</strong>
+            <strong>📋 Ce que vous obtiendrez en Premium :</strong>
             <ul style="margin: 6px 0 0 0; padding-left: 20px; font-size: 13px; color: #6c757d;">
                 <li>📊 <strong>Grands titres</strong> explicatifs sur chaque graphique</li>
-                <li>📈 Comparaison de <strong>3 scénarios</strong> d'investissement</li>
+                <li>📈 Comparaison de <strong>3 scénarios</strong> personnalisés</li>
                 <li>💰 Impact visuel de <strong>l'inflation</strong> sur votre capital</li>
                 <li>🎯 Synthèse des <strong>gains potentiels</strong></li>
                 <li>📄 Format professionnel <strong>haute résolution</strong></li>
+                <li>🔐 Rapport <strong>personnalisé</strong> avec votre email</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
 
 st.divider()
 st.caption("🔒 Paiement sécurisé - 7 jours d'essai inclus - Satisfait ou remboursé")
-
-
-
