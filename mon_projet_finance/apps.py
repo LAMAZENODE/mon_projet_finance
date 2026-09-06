@@ -267,6 +267,17 @@ st.markdown("""
         color: #155724;
         border: 1px solid #28a745;
     }
+    
+    /* Animation pour le bouton */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    .btn-pulse {
+        animation: pulse 2s infinite;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -278,6 +289,8 @@ if "est_abonne" not in st.session_state:
     st.session_state["est_abonne"] = False
 if "email" not in st.session_state:
     st.session_state["email"] = ""
+if "show_stripe_button" not in st.session_state:
+    st.session_state["show_stripe_button"] = False
 
 # ============================================
 # FONCTIONS
@@ -340,7 +353,7 @@ def creer_session_paiement():
     try:
         email = st.session_state.get("email", "").strip()
         if not email or not valider_email(email):
-            st.error("Email invalide")
+            st.error("❌ Email invalide")
             return None
         
         session = stripe.checkout.Session.create(
@@ -353,7 +366,7 @@ def creer_session_paiement():
         )
         return session.url
     except Exception as e:
-        st.error(f"Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         return None
 
 # ============================================
@@ -363,13 +376,13 @@ def creer_session_paiement():
 query_params = st.query_params
 if "success" in query_params:
     st.session_state["est_abonne"] = True
-    st.success("🎉 Abonnement active avec succes !")
+    st.success("🎉 Abonnement active avec succes ! Bienvenue dans l'espace Premium.")
     st.balloons()
     st.query_params.clear()
     st.rerun()
 
 if "cancel" in query_params:
-    st.warning("Paiement annule.")
+    st.warning("ℹ️ Paiement annule.")
     st.query_params.clear()
 
 # ============================================
@@ -386,6 +399,7 @@ with st.sidebar:
         if st.button("🚪 Se deconnecter", use_container_width=True):
             st.session_state["est_abonne"] = False
             st.session_state["email"] = ""
+            st.session_state["show_stripe_button"] = False
             st.rerun()
     else:
         st.markdown('<div class="sidebar-status free">⚡ Version Gratuite</div>', unsafe_allow_html=True)
@@ -437,7 +451,7 @@ if st.session_state["est_abonne"]:
     # INTERFACE MEMBRE (DÉBLOQUÉE)
     # ==========================================
     
-    st.success("🔓 Acces Premium debloque !")
+    st.success("🔓 Acces Premium debloque ! Profitez de toutes les fonctionnalites.")
     
     st.markdown("### 📊 Parametres de simulation")
     col1, col2, col3 = st.columns(3)
@@ -459,13 +473,13 @@ if st.session_state["est_abonne"]:
     with c3:
         taux_c = st.number_input("🟩 Premium (%)", value=8.5, step=0.1)
     
-    with st.spinner("⏳ Calcul..."):
+    with st.spinner("⏳ Calcul en cours..."):
         df_a = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_a, inflation, annees)).set_index("Année")
         df_b = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_b, inflation, annees)).set_index("Année")
         df_c = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_c, inflation, annees)).set_index("Année")
     
     # Métriques
-    st.markdown("### 🎯 Synthese")
+    st.markdown("### 🎯 Synthese comparative")
     col_m1, col_m2, col_m3 = st.columns(3)
     
     gain_a = df_a["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
@@ -473,11 +487,11 @@ if st.session_state["est_abonne"]:
     gain_c = df_c["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
     
     with col_m1:
-        st.metric("Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_a:+,.0f} €")
+        st.metric("📊 Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_a:+,.0f} €")
     with col_m2:
-        st.metric("Optimise", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_b:+,.0f} €")
+        st.metric("📈 Optimise", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_b:+,.0f} €")
     with col_m3:
-        st.metric("Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_c:+,.0f} €")
+        st.metric("🚀 Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_c:+,.0f} €")
     
     # Graphique
     st.markdown("### 📈 Evolution du pouvoir d'achat")
@@ -492,9 +506,9 @@ if st.session_state["est_abonne"]:
     st.markdown("### 📥 Export PDF")
     pdf = generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation)
     st.download_button(
-        "📥 Telecharger le rapport (PDF)",
+        "📥 Telecharger le rapport complet (PDF)",
         data=pdf,
-        file_name=f"rapport_{datetime.now().strftime('%Y%m%d')}.pdf",
+        file_name=f"rapport_epargne_{datetime.now().strftime('%Y%m%d')}.pdf",
         mime="application/pdf",
         use_container_width=True
     )
@@ -553,7 +567,7 @@ else:
                 <div style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
                     <label style="font-weight: 600; font-size: 14px; display: block; text-align: left; margin-bottom: 6px;">📧 Votre email :</label>
                     <input type="email" id="email_input_paywall" placeholder="vous@exemple.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
-                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35); transition: all 0.3s;">
+                    <button onclick="document.getElementById('stButton_subscribe').click()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px; border: none; border-radius: 50px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35); transition: all 0.3s;" class="btn-pulse">
                         🔓 DEBLOQUER MAINTENANT
                     </button>
                 </div>
@@ -566,14 +580,15 @@ else:
         if email_input:
             st.session_state["email"] = email_input
         
-        # Bouton d'abonnement
+        # Bouton d'abonnement (caché mais fonctionnel)
         if st.button("🔓 DEBLOQUER MAINTENANT", use_container_width=True, key="stButton_subscribe"):
             if not valider_email(st.session_state.get("email", "")):
                 st.error("⚠️ Veuillez entrer une adresse email valide.")
             else:
                 checkout_url = creer_session_paiement()
                 if checkout_url:
-                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 10px;">💳 Payer securise via Stripe</a>', unsafe_allow_html=True)
+                    st.session_state["show_stripe_button"] = True
+                    st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 10px; font-size: 16px;">💳 Payer securise via Stripe</a>', unsafe_allow_html=True)
         
         # Badges de sécurité
         st.markdown("""
