@@ -126,53 +126,67 @@ st.markdown("""
         font-size: 18px;
     }
     
-    .blur-preview-container {
-        position: relative;
+    .preview-container {
         border-radius: 16px;
         overflow: hidden;
         background: #f8f9fe;
-        border: 2px dashed #d0d3e0;
-        min-height: 500px;
+        border: 2px solid #e0e4f0;
+        position: relative;
+        min-height: 400px;
     }
     
-    .blur-preview-content {
-        filter: blur(6px) grayscale(0.2);
-        pointer-events: none;
-        user-select: none;
-        opacity: 0.5;
+    .preview-content {
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
     }
     
-    .blur-overlay-cta {
+    .preview-overlay {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.85) 70%, rgba(255,255,255,0.95) 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         z-index: 10;
-        text-align: center;
-        background: rgba(255,255,255,0.95);
-        padding: 30px 40px;
         border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        backdrop-filter: blur(8px);
-        max-width: 80%;
+        padding: 20px;
     }
     
-    .blur-overlay-cta h3 {
-        margin: 0 0 8px 0;
+    .preview-overlay .lock-icon {
+        font-size: 56px;
+        margin-bottom: 10px;
+    }
+    
+    .preview-overlay h3 {
+        margin: 0 0 6px 0;
         color: #1a1a2e;
-        font-size: 24px;
+        font-size: 22px;
+        font-weight: 700;
     }
     
-    .blur-overlay-cta p {
+    .preview-overlay p {
         margin: 0 0 16px 0;
         color: #6c757d;
-        font-size: 14px;
+        font-size: 15px;
+        text-align: center;
     }
     
-    .blur-overlay-cta .lock-icon {
-        font-size: 48px;
-        display: block;
-        margin-bottom: 10px;
+    .preview-overlay .price-tag {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .preview-overlay .price-tag span {
+        padding: 6px 18px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 700;
     }
     
     .testimonial-card {
@@ -222,7 +236,7 @@ st.markdown("""
         gap: 4px;
     }
     
-    .metric-highlight {
+    .metric-preview {
         background: white;
         padding: 12px 16px;
         border-radius: 10px;
@@ -230,19 +244,19 @@ st.markdown("""
         text-align: center;
     }
     
-    .metric-highlight .value {
-        font-size: 28px;
+    .metric-preview .value {
+        font-size: 24px;
         font-weight: 800;
         color: #dc3545;
     }
     
-    .metric-highlight .label {
-        font-size: 13px;
+    .metric-preview .label {
+        font-size: 12px;
         color: #6c757d;
         font-weight: 500;
     }
     
-    .metric-highlight.green .value {
+    .metric-preview.green .value {
         color: #28a745;
     }
     
@@ -268,7 +282,6 @@ st.markdown("""
         border: 1px solid #28a745;
     }
     
-    /* Animation pour le bouton */
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.02); }
@@ -289,8 +302,6 @@ if "est_abonne" not in st.session_state:
     st.session_state["est_abonne"] = False
 if "email" not in st.session_state:
     st.session_state["email"] = ""
-if "show_stripe_button" not in st.session_state:
-    st.session_state["show_stripe_button"] = False
 
 # ============================================
 # FONCTIONS
@@ -376,7 +387,7 @@ def creer_session_paiement():
 query_params = st.query_params
 if "success" in query_params:
     st.session_state["est_abonne"] = True
-    st.success("🎉 Abonnement active avec succes ! Bienvenue dans l'espace Premium.")
+    st.success("🎉 Abonnement active avec succes !")
     st.balloons()
     st.query_params.clear()
     st.rerun()
@@ -399,7 +410,6 @@ with st.sidebar:
         if st.button("🚪 Se deconnecter", use_container_width=True):
             st.session_state["est_abonne"] = False
             st.session_state["email"] = ""
-            st.session_state["show_stripe_button"] = False
             st.rerun()
     else:
         st.markdown('<div class="sidebar-status free">⚡ Version Gratuite</div>', unsafe_allow_html=True)
@@ -416,14 +426,12 @@ with st.sidebar:
         """)
         
         if st.button("🔥 S'abonner", use_container_width=True, type="primary"):
-            st.session_state["scroll_to_paywall"] = True
             st.rerun()
 
 # ============================================
 # INTERFACE PRINCIPALE
 # ============================================
 
-# Header
 col_logo, col_right = st.columns([3, 1])
 with col_logo:
     st.markdown('<span class="premium-badge">✨ VERSION 2.0</span>', unsafe_allow_html=True)
@@ -451,7 +459,7 @@ if st.session_state["est_abonne"]:
     # INTERFACE MEMBRE (DÉBLOQUÉE)
     # ==========================================
     
-    st.success("🔓 Acces Premium debloque ! Profitez de toutes les fonctionnalites.")
+    st.success("🔓 Acces Premium debloque !")
     
     st.markdown("### 📊 Parametres de simulation")
     col1, col2, col3 = st.columns(3)
@@ -473,13 +481,12 @@ if st.session_state["est_abonne"]:
     with c3:
         taux_c = st.number_input("🟩 Premium (%)", value=8.5, step=0.1)
     
-    with st.spinner("⏳ Calcul en cours..."):
+    with st.spinner("⏳ Calcul..."):
         df_a = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_a, inflation, annees)).set_index("Année")
         df_b = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_b, inflation, annees)).set_index("Année")
         df_c = pd.DataFrame(simuler_scenario_inflation(initial, mensuel, taux_c, inflation, annees)).set_index("Année")
     
-    # Métriques
-    st.markdown("### 🎯 Synthese comparative")
+    st.markdown("### 🎯 Synthese")
     col_m1, col_m2, col_m3 = st.columns(3)
     
     gain_a = df_a["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
@@ -487,14 +494,13 @@ if st.session_state["est_abonne"]:
     gain_c = df_c["Pouvoir d'Achat Réel (€)"].iloc[-1] - initial
     
     with col_m1:
-        st.metric("📊 Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_a:+,.0f} €")
+        st.metric("Standard", f"{df_a['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_a:+,.0f} €")
     with col_m2:
-        st.metric("📈 Optimise", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_b:+,.0f} €")
+        st.metric("Optimise", f"{df_b['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_b:+,.0f} €")
     with col_m3:
-        st.metric("🚀 Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_c:+,.0f} €")
+        st.metric("Premium", f"{df_c['Pouvoir d\'Achat Réel (€)'].iloc[-1]:,.0f} €", f"{gain_c:+,.0f} €")
     
-    # Graphique
-    st.markdown("### 📈 Evolution du pouvoir d'achat")
+    st.markdown("### 📈 Evolution")
     df_compare = pd.DataFrame({
         "Standard": df_a["Pouvoir d'Achat Réel (€)"],
         "Optimise": df_b["Pouvoir d'Achat Réel (€)"],
@@ -502,20 +508,19 @@ if st.session_state["est_abonne"]:
     })
     st.line_chart(df_compare)
     
-    # Export PDF
     st.markdown("### 📥 Export PDF")
     pdf = generer_pdf(df_a, df_b, df_c, initial, mensuel, inflation)
     st.download_button(
-        "📥 Telecharger le rapport complet (PDF)",
+        "📥 Telecharger le rapport (PDF)",
         data=pdf,
-        file_name=f"rapport_epargne_{datetime.now().strftime('%Y%m%d')}.pdf",
+        file_name=f"rapport_{datetime.now().strftime('%Y%m%d')}.pdf",
         mime="application/pdf",
         use_container_width=True
     )
 
 else:
     # ==========================================
-    # BLOC PAYWALL
+    # BLOC PAYWALL AMÉLIORÉ - SANS FLU TOTAL
     # ==========================================
     
     # Bannière d'aperçu gratuit
@@ -575,22 +580,18 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        # Email input
         email_input = st.text_input("", placeholder="vous@exemple.com", key="email_paywall", label_visibility="collapsed")
         if email_input:
             st.session_state["email"] = email_input
         
-        # Bouton d'abonnement (caché mais fonctionnel)
         if st.button("🔓 DEBLOQUER MAINTENANT", use_container_width=True, key="stButton_subscribe"):
             if not valider_email(st.session_state.get("email", "")):
                 st.error("⚠️ Veuillez entrer une adresse email valide.")
             else:
                 checkout_url = creer_session_paiement()
                 if checkout_url:
-                    st.session_state["show_stripe_button"] = True
                     st.markdown(f'<a href="{checkout_url}" target="_blank" style="display: block; text-align: center; background: #28a745; color: white; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 700; margin-top: 10px; font-size: 16px;">💳 Payer securise via Stripe</a>', unsafe_allow_html=True)
         
-        # Badges de sécurité
         st.markdown("""
         <div class="security-badge">
             <span>🔒 100% securise</span>
@@ -602,32 +603,22 @@ else:
         
         st.divider()
         
-        # Témoignages
         st.markdown("### 💬 Ce qu'en disent nos utilisateurs")
         st.markdown("""
         <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
             <p style="font-style: italic; margin: 6px 0;">"Cet outil m'a fait realiser l'impact reel de l'inflation sur mon livret A. J'ai reaguste mes investissements immediatement. Les 9€ sont rentabilises au centuple !"</p>
-            <div class="author">
-                Thomas R. 
-                <span class="role">— Entrepreneur</span>
-            </div>
+            <div class="author">Thomas R. <span class="role">— Entrepreneur</span></div>
         </div>
         <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
             <p style="font-style: italic; margin: 6px 0;">"Les graphiques comparatifs sont ultra clairs. L'export PDF est parfait pour faire des points financiers en famille."</p>
-            <div class="author">
-                Sarah M. 
-                <span class="role">— Cadre Financier</span>
-            </div>
+            <div class="author">Sarah M. <span class="role">— Cadre Financier</span></div>
         </div>
         <div class="testimonial-card">
             <div class="stars">⭐⭐⭐⭐⭐</div>
             <p style="font-style: italic; margin: 6px 0;">"Enfin un simulateur qui montre la verite sur l'epargne ! L'inflation est un ennemi silencieux, cet outil le rend visible."</p>
-            <div class="author">
-                David L. 
-                <span class="role">— Ingenieur</span>
-            </div>
+            <div class="author">David L. <span class="role">— Ingenieur</span></div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -638,38 +629,37 @@ else:
             <span style="background: #ff4757; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">DEMO</span>
         </div>
         """, unsafe_allow_html=True)
-        st.caption("👆 Decouvrez ce que vous pourrez analyser en detail apres abonnement")
+        st.caption("👆 Voici un apercu de ce que vous pourrez analyser en detail")
         
-        # Conteneur avec aperçu flouté
-        st.markdown('<div class="blur-preview-container">', unsafe_allow_html=True)
-        st.markdown('<div class="blur-preview-content">', unsafe_allow_html=True)
+        # Conteneur avec aperçu (sans flou, mais avec overlay)
+        st.markdown('<div class="preview-container">', unsafe_allow_html=True)
+        st.markdown('<div class="preview-content">', unsafe_allow_html=True)
         
-        # Métriques d'aperçu
+        # Métriques d'aperçu (visibles)
         col_m1, col_m2 = st.columns(2)
         with col_m1:
             st.markdown("""
-            <div class="metric-highlight">
+            <div class="metric-preview">
                 <div class="value">-2,3%</div>
                 <div class="label">📉 Perte de pouvoir d'achat / an</div>
             </div>
             """, unsafe_allow_html=True)
         with col_m2:
             st.markdown("""
-            <div class="metric-highlight green">
+            <div class="metric-preview green">
                 <div class="value">+15 400€</div>
                 <div class="label">🚀 Gain potentiel sur 10 ans</div>
             </div>
             """, unsafe_allow_html=True)
         
-        # Graphique d'aperçu
+        # Graphique d'aperçu (visible mais en version simplifiée)
         data_preview = pd.DataFrame({
             "Années": list(range(1, 16)),
             "Livret A (3%)": [10000 * (1.03**i) for i in range(1, 16)],
-            "Strategie Premium (8.5%)": [10000 * (1.085**i) for i in range(1, 16)],
-            "Pouvoir d'achat reel": [10000 * (0.975**i) for i in range(1, 16)]
+            "Strategie Premium (8.5%)": [10000 * (1.085**i) for i in range(1, 16)]
         }).set_index("Années")
         
-        st.line_chart(data_preview)
+        st.line_chart(data_preview, use_container_width=True)
         
         # Tableau d'aperçu
         st.dataframe(
@@ -677,12 +667,10 @@ else:
             use_container_width=True,
             column_config={
                 "Livret A (3%)": st.column_config.NumberColumn("💰 Livret A", format="%.0f €"),
-                "Strategie Premium (8.5%)": st.column_config.NumberColumn("🚀 Premium", format="%.0f €"),
-                "Pouvoir d'achat reel": st.column_config.NumberColumn("📉 Inflation", format="%.0f €")
+                "Strategie Premium (8.5%)": st.column_config.NumberColumn("🚀 Premium", format="%.0f €")
             }
         )
         
-        # Info
         st.markdown("""
         <div style="background: #fff3cd; padding: 12px 16px; border-radius: 8px; margin-top: 8px; border-left: 4px solid #ffc107;">
             <strong>💡 Le saviez-vous ?</strong>
@@ -690,22 +678,22 @@ else:
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # fin blur-preview-content
+        st.markdown('</div>', unsafe_allow_html=True)  # fin preview-content
         
-        # Overlay CTA
+        # Overlay avec CTA (semi-transparent)
         st.markdown("""
-        <div class="blur-overlay-cta">
+        <div class="preview-overlay">
             <span class="lock-icon">🔒</span>
-            <h3>Contenu Premium</h3>
+            <h3>Version Premium</h3>
             <p>Abonnez-vous pour debloquer<br>l'integralite des analyses</p>
-            <div style="display: flex; gap: 8px; justify-content: center;">
-                <span style="background: #667eea; color: white; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600;">9€/mois</span>
-                <span style="background: #28a745; color: white; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600;">⭐ 5/5</span>
+            <div class="price-tag">
+                <span style="background: #667eea; color: white;">9€/mois</span>
+                <span style="background: #28a745; color: white;">⭐ 5/5</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # fin blur-preview-container
+        st.markdown('</div>', unsafe_allow_html=True)  # fin preview-container
     
     st.divider()
     
