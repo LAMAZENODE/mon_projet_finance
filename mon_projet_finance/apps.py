@@ -158,7 +158,7 @@ def creer_session_paiement():
         
         # Modifications pour l'abonnement récurrent
         session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
+        
             line_items=[{"price": ID_PRIX_MENSUEL, "quantity": 1}], # Utilisation du prix mensuel
             mode="subscription", # Changement crucial ici
             success_url=f"{URL_APP}?success=true", # Corrigé : URL_APP au lieu de APP_URL
